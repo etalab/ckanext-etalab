@@ -1,6 +1,21 @@
 {% ckan_extends %}
 
-{% block secondary_content %}
-  {{ super() }}
-  {{ h.example_helper() }}
+
+{% block home_image %}
+        <section class="featured media-overlay">
+            <h2 class="media-heading">{% block home_image_caption %}Startups Françaises - Efficacité des services publics{% endblock %}</h2>
+    {% block home_image_content %}
+            <a class="media-image" href="#">
+                <img src="/featured.png" alt="open data" width="420" height="220" />
+            </a>
+      {% endblock %}
+        </section>
 {% endblock %}
+
+
+{#
+{% block secondary_content %}
+    {{ super() }}
+    {{ h.example_helper() }}
+{% endblock %}
+#}
