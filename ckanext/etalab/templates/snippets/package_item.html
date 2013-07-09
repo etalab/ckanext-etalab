@@ -1,4 +1,26 @@
 {#
+CKANExt-Etalab -- CKAN extension for Etalab
+By: Emmanuel Raviart <emmanuel@raviart.com>
+
+Copyright (C) 2013 Emmanuel Raviart
+http://gitorious.org/etalab/ckanext-etalab
+
+This file is part of CKANExt-Etalab.
+
+CKANExt-Etalab is free software; you can redistribute it and/or modify
+it under the terms of the GNU Affero General Public License as
+published by the Free Software Foundation, either version 3 of the
+License, or (at your option) any later version.
+
+CKANExt-Etalab is distributed in the hope that it will be useful,
+but WITHOUT ANY WARRANTY; without even the implied warranty of
+MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+GNU Affero General Public License for more details.
+
+You should have received a copy of the GNU Affero General Public License
+along with this program.  If not, see <http://www.gnu.org/licenses/>.
+
+
 Displays a single of dataset.
 
 package        - A package to display.
@@ -46,7 +68,7 @@ Example:
         <p class="empty">{{ _("This dataset has no description") }}</p>
       {% endif %}
     </div>
-    {% if package.smart_viewers %}
+    {% if smart_viewers %}
       <ul class="dataset-smart-viewers unstyled">
         {% for smart_viewer in smart_viewers %}
           <li>
