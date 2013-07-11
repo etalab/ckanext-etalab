@@ -45,6 +45,8 @@ class EtalabThemePlugin(plugins.SingletonPlugin):
 
 def smart_viewers(package):
     """Helper function to extract smart viewers from the related of a package."""
+    print package['id']
+    return []
     return [
         related
         for related in package.related
