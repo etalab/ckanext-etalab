@@ -26,7 +26,7 @@
 import ckan.plugins as plugins
 
 
-class EtalabThemePlugin(plugins.SingletonPlugin):
+class EtalabPlugin(plugins.SingletonPlugin):
     plugins.implements(plugins.IConfigurer)
     plugins.implements(plugins.ITemplateHelpers)
 
@@ -34,21 +34,23 @@ class EtalabThemePlugin(plugins.SingletonPlugin):
         # Tell CKAN what custom template helper functions this plugin provides,
         # see the ITemplateHelpers plugin interface.
         return dict(
-            smart_viewers = smart_viewers,
+#            smart_viewers = smart_viewers,
             )
 
     def update_config(self, config):
         # Update CKAN's config settings, see the IConfigurer plugin interface.
         plugins.toolkit.add_public_directory(config, 'public')
         plugins.toolkit.add_template_directory(config, 'templates')
+        plugins.toolkit.add_resource('public', 'ckanext-etalab')
 
 
 def smart_viewers(package):
     """Helper function to extract smart viewers from the related of a package."""
-    print package['id']
+    # TODO
+#    print package['id']
     return []
-    return [
-        related
-        for related in package.related
-        if related.type == 'smart_viewer'
-        ]
+#    return [
+#        related
+#        for related in package.related
+#        if related.type == 'smart_viewer'
+#        ]
