@@ -50,6 +50,8 @@ setup(
     ],
     entry_points = """
         [ckan.plugins]
-        etalab_theme = ckanext.etalab.plugin:EtalabPlugin
+        etalab = ckanext.etalab.plugins:EtalabPlugin
+        etalab_dataset_form = ckanext.etalab.plugins:EtalabDatasetFormPlugin
+        etalab_query = ckanext.etalab.plugins:EtalabQueryPlugin
         """,
     )

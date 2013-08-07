@@ -1,0 +1,48 @@
+{#
+CKANExt-Etalab -- CKAN extension for Etalab
+By: Emmanuel Raviart <emmanuel@raviart.com>
+
+Copyright (C) 2013 Emmanuel Raviart
+http://gitorious.org/etalab/ckanext-etalab
+
+This file is part of CKANExt-Etalab.
+
+CKANExt-Etalab is free software; you can redistribute it and/or modify
+it under the terms of the GNU Affero General Public License as
+published by the Free Software Foundation, either version 3 of the
+License, or (at your option) any later version.
+
+CKANExt-Etalab is distributed in the hope that it will be useful,
+but WITHOUT ANY WARRANTY; without even the implied warranty of
+MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+GNU Affero General Public License for more details.
+
+You should have received a copy of the GNU Affero General Public License
+along with this program.  If not, see <http://www.gnu.org/licenses/>.
+#}
+
+
+{% ckan_extends %}
+
+
+{% block package_basic_fields_custom %}
+    {% resource 'ckanext-etalab/territory.js' %}
+    {% set territorial_coverage_attrs = {'data-module': 'autocomplete-territory', 'multiple': 'multiple'} %}
+    {{ form.input('territorial_coverage', label='Territoires couverts', id='field-territorial_coverage', placeholder='Entrez une commune, un département ou une région...', value=data.territorial_coverage, error=errors.territorial_coverage, classes=['autocomplete-territories', 'control-full'], attrs=territorial_coverage_attrs) }}
+
+    <div class="control-group">
+        <label class="control-label" for="field-territorial_coverage_granularity">Granularité territoriale des données</label>
+        <div class="controls">
+            <select id="field-territorial_coverage_granularity" name="territorial_coverage_granularity" data-module="autocomplete">
+                <option value="commune">Commune</option>
+                <option value="epci">Intercommunalité (EPCI)</option>
+                <option value="department">Département</option>
+                <option value="region">Région</option>
+                <option value="region">France entière</option>
+            </select>
+        </div>
+    </div>
+
+    {{ form.input('temporal_coverage_from', label='Début de la période couverte', id='field-temporal_coverage_from', placeholder='Entrez une date ou une année...', value=data.temporal_coverage_from, error=errors.temporal_coverage_from, classes=['control-full']) }}
+    {{ form.input('temporal_coverage_to', label='Fin de la période couverte', id='field-temporal_coverage_to', placeholder='Entrez une date ou une année...', value=data.temporal_coverage_to, error=errors.temporal_coverage_to, classes=['control-full']) }}
+{% endblock %}
