@@ -126,10 +126,10 @@ class EtalabQueryPlugin(plugins.SingletonPlugin):
         year_from = temporal_coverage_from.split('-', 1)[0] if temporal_coverage_from is not None else None
         temporal_coverage_to = pkg_dict.get('temporal_coverage_to')
         year_to = temporal_coverage_to.split('-', 1)[0] if temporal_coverage_to is not None else None
-        if year_from is None:
-            if year_to is not None:
+        if not year_from:
+            if year_to:
                 pkg_dict['covered_years'] = [year_to]
-        elif year_to is None:
+        elif not year_to:
             pkg_dict['covered_years'] = [year_from]
         else:
             year_from, year_to = sorted([year_from, year_to])
