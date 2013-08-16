@@ -39,12 +39,12 @@ class EtalabDatasetFormPlugin(plugins.SingletonPlugin, tk.DefaultDatasetForm):
         from ckan.logic import converters
         schema.update(dict(
             temporal_coverage_from = [
-#                tk.get_validator('ignore_missing'),
+                tk.get_validator('ignore_missing'),
                 converters.date_to_db,
                 tk.get_converter('convert_to_extras'),
                 ],
             temporal_coverage_to = [
-#                tk.get_validator('ignore_missing'),
+                tk.get_validator('ignore_missing'),
                 converters.date_to_db,
                 tk.get_converter('convert_to_extras'),
                 ],
@@ -87,13 +87,13 @@ class EtalabDatasetFormPlugin(plugins.SingletonPlugin, tk.DefaultDatasetForm):
         schema.update(dict(
             temporal_coverage_from = [
                 tk.get_converter('convert_from_extras'),
+                tk.get_validator('ignore_missing'),
                 converters.date_to_form,
-#                tk.get_validator('ignore_missing'),
                 ],
             temporal_coverage_to = [
                 tk.get_converter('convert_from_extras'),
+                tk.get_validator('ignore_missing'),
                 converters.date_to_form,
-#                tk.get_validator('ignore_missing'),
                 ],
             territorial_coverage = [
                 tk.get_converter('convert_from_extras'),
