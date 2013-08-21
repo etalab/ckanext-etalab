@@ -30,6 +30,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
     {% set territorial_coverage_attrs = {'data-module': 'autocomplete-territory', 'multiple': 'multiple'} %}
     {{ form.input('territorial_coverage', label='Territoires couverts', id='field-territorial_coverage', placeholder='Entrez une commune, un département ou une région...', value=data.territorial_coverage, error=errors.territorial_coverage, classes=['autocomplete-territories', 'control-full'], attrs=territorial_coverage_attrs) }}
     {{ form.select('territorial_coverage_granularity', id = 'field-territorial_coverage_granularity', label = 'Granularité territoriale des données', options = [
+            {'value': '', 'text': ''},
             {'value': 'commune', 'text': 'Commune'},
             {'value': 'epci', 'text': 'Intercommunalité (EPCI)'},
             {'value': 'department', 'text': 'Département'},
