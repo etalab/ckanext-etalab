@@ -178,6 +178,11 @@ class EtalabQueryPlugin(plugins.SingletonPlugin):
             c.territory = territory_kind_code_str
 
             if territory:
+                # Store territory in a cookie after having removed "large" attributes.
+                territory = territory.copy()
+                territory.pop('ancestors', None)
+                territory.pop('ancestors_kind_code', None)
+                territory.pop('postal_distributions', None)
                 tk.response.set_cookie('territory', json.dumps(territory), httponly = True,
                     secure = tk.request.scheme == 'https')
             else:
