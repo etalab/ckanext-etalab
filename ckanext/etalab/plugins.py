@@ -41,22 +41,22 @@ class EtalabDatasetFormPlugin(plugins.SingletonPlugin, tk.DefaultDatasetForm):
             temporal_coverage_from = [
                 tk.get_validator('ignore_missing'),
                 converters.date_to_db,
-                tk.get_converter('convert_to_extras'),
+                convert_to_extras,  # tk.get_converter('convert_to_extras') is buggy.
                 ],
             temporal_coverage_to = [
                 tk.get_validator('ignore_missing'),
                 converters.date_to_db,
-                tk.get_converter('convert_to_extras'),
+                convert_to_extras,  # tk.get_converter('convert_to_extras') is buggy.
                 ],
             territorial_coverage = [
                 tk.get_validator('ignore_missing'),
                 # TODO: Add validator.
-                tk.get_converter('convert_to_extras'),
+                convert_to_extras,  # tk.get_converter('convert_to_extras') is buggy.
                 ],
             territorial_coverage_granularity = [
                 tk.get_validator('ignore_missing'),
                 # TODO: Add validator.
-                tk.get_converter('convert_to_extras'),
+                convert_to_extras,  # tk.get_converter('convert_to_extras') is buggy.
                 ],
             ))
         return schema
@@ -186,6 +186,18 @@ class EtalabPlugin(plugins.SingletonPlugin):
         tk.add_public_directory(config, 'public')
         tk.add_template_directory(config, 'templates')
         tk.add_resource('public', 'ckanext-etalab')
+
+
+def convert_to_extras(key, data, errors, context):
+    # Replace ckan.logic.converters.convert_to_extras to ensure that extras are appended after existing extras.
+    # Otherwise they will be erased by ckan.lib.navl.dictization_functions.flatten.
+    assert isinstance(key, tuple) and len(key) == 1
+    last_index = -1
+    for key_tuple in data.iterkeys():
+        if len(key_tuple) >= 3 and key_tuple[0] == 'extras':
+            last_index = max(last_index, key_tuple[1])
+    data[('extras', last_index + 1, 'key')] = key[-1]
+    data[('extras', last_index + 1, 'value')] = data[key]
 
 
 def reject_extras(container, *names):
