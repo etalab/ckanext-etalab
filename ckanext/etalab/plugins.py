@@ -148,25 +148,32 @@ class EtalabQueryPlugin(plugins.SingletonPlugin):
         return pkg_dict
 
     def before_search(self, search_params):
-        territory = search_params.get('extras', {}).get('ext_territory')
-        if territory is not None:
-            territory_kind, territory_code = territory.split('/')
+        territory_kind_code_str = search_params.get('extras', {}).get('ext_territory')
+        if territory_kind_code_str is not None:
+            territory_kind, territory_code = territory_kind_code_str.split('/')
             response = urllib2.urlopen('http://localhost:8090/api/v1/territory?kind={}&code={}'.format(territory_kind,
                 territory_code))
             response_dict = json.loads(response.read())
-            ancestors_kind_code = response_dict.get('data', {}).get('ancestors_kind_code')
+            territory = response_dict.get('data', {})
+            ancestors_kind_code = territory.get('ancestors_kind_code')
             if ancestors_kind_code:
                 territories = [
                     u'{}/{}'.format(ancestor_kind_code['kind'], ancestor_kind_code['code'])
                     for ancestor_kind_code in ancestors_kind_code
                     ]
-#                search_params['fq'] = '{} +covered_territories:{}'.format(search_params['fq'], territory)
+#                search_params['fq'] = '{} +covered_territories:{}'.format(search_params['fq'], territory_kind_code_str)
                 search_params['fq'] = '{} +covered_territories:({})'.format(search_params['fq'],
                     ' OR '.join(territories))
 
             # Add territory to c, to ensure that search.html can use it.
             from ckan.lib.base import c
-            c.territory = territory
+            c.territory = territory_kind_code_str
+
+            if territory:
+                tk.response.set_cookie('territory', json.dumps(territory), httponly = True,
+                    secure = tk.request.scheme == 'https')
+            else:
+                tk.response.delete_cookie('territory')
         return search_params
 
 

@@ -19,12 +19,22 @@ GNU Affero General Public License for more details.
 
 You should have received a copy of the GNU Affero General Public License
 along with this program.  If not, see <http://www.gnu.org/licenses/>.
+
+
+This page is a customization of ckan/ckan/templates/snippets/search_form.html
+that adds territory-based search.
 #}
 
 
 {% ckan_extends %}
 
 
-{% block package_additional_info %}
-  {% snippet "package/snippets/additional_info.html", pkg_dict=h.reject_extras(pkg, 'territorial_coverage', 'territorial_coverage_granularity') %}
-{% endblock %}
+  {% block search_input %}
+    {{ super() }}
+
+    {% resource 'ckanext-etalab/territory.js' %}
+    <span class="control-group search-giant" data-module="autocomplete-territory">
+        <input type="text" class="autocomplete-territory search" name="ext_territory" value="{{ territory }}" autocomplete="off" placeholder="Où..." />
+    </span>
+  {% endblock %}
+

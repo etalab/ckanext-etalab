@@ -1,0 +1,70 @@
+{#
+CKANExt-Etalab -- CKAN extension for Etalab
+By: Emmanuel Raviart <emmanuel@raviart.com>
+
+Copyright (C) 2013 Emmanuel Raviart
+http://gitorious.org/etalab/ckanext-etalab
+
+This file is part of CKANExt-Etalab.
+
+CKANExt-Etalab is free software; you can redistribute it and/or modify
+it under the terms of the GNU Affero General Public License as
+published by the Free Software Foundation, either version 3 of the
+License, or (at your option) any later version.
+
+CKANExt-Etalab is distributed in the hope that it will be useful,
+but WITHOUT ANY WARRANTY; without even the implied warranty of
+MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+GNU Affero General Public License for more details.
+
+You should have received a copy of the GNU Affero General Public License
+along with this program.  If not, see <http://www.gnu.org/licenses/>.
+
+
+Displays a single related item.
+
+related - The related item dict.
+pkg_id  - The id of the owner package. If present the edit button will be
+          displayed.
+
+Example:
+
+
+
+#}
+
+
+{% set placeholder_map = {
+'application':'/base/images/placeholder-application.png'
+} %}
+{% set tooltip = _('Go to {related_item_type}').format(related_item_type=related.type|replace('_', ' ')|title) %}
+{% set related_description = related.description|replace('{full_name}', territory.full_name) %}
+{% set related_title = related.title|replace('{full_name}', territory.full_name) %}
+{% set related_url = related.url|replace('{depcom}', territory.code) %}
+<li class="related-item media-item" data-module="related-item">
+  <img src="{{ related.image_url or placeholder_map[related.type] or '/base/images/placeholder-image.png' }}" alt="{{ related_title }}" class="media-image">
+  <h3 class="media-heading">{{ related_title }}</h3>
+  {% if related_description %}
+    <div class="prose">{{ h.render_markdown(related_description) }}</div>
+  {% else %}
+    <p class="empty">{{ _('This item has no description') }}</p>
+  {% endif %}
+  <a class="media-view" href="{{ related_url }}" target="_blank" title="{{ tooltip }}">
+    <span>{{ tooltip }}</span>
+    <span class="banner">
+      {%- if related.type == 'application' -%}
+        app
+      {%- elif related.type == 'visualization' -%}
+        viz
+      {%- else -%}
+        {{ related.type | replace('news_', '') }}
+      {%- endif -%}
+    </span>
+  </a>
+  {% if pkg_id %}
+    {{ h.nav_link(_('Edit'), controller='related', action='edit', id=pkg_id, related_id=related.id, class_='btn btn-primary btn-small media-edit') }}
+  {% endif %}
+</li>
+{% if position is divisibleby 3 %}
+  <li class="clearfix js-hide"></li>
+{% endif %}

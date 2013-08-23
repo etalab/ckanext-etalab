@@ -25,10 +25,21 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 {% ckan_extends %}
 
 
-{% block dataset_search_ext %}
-          {% resource 'ckanext-etalab/territory.js' %}
-          <span class="control-group search-giant" data-module="autocomplete-territory">
-            <input type="text" class="autocomplete-territory search" name="ext_territory" value="{{ c.territory }}" autocomplete="off" placeholder="Où..." />
-          </span>
-{% endblock %}
+      {% block form %}
+        {% set facets = {
+          'fields': c.fields_grouped,
+          'search': c.search_facets,
+          'titles': c.facet_titles,
+          'translated_fields': c.translated_fields,
+          'remove_field': c.remove_field }
+        %}
+        {% set sorting = [
+          (_('Relevance'), 'score desc, metadata_modified desc'),
+          (_('Name Ascending'), 'title_string asc'),
+          (_('Name Descending'), 'title_string desc'),
+          (_('Last Modified'), 'metadata_modified desc'),
+          (_('Popular'), 'views_recent desc') if g.tracking_enabled else (false, false) ]
+        %}
+        {% snippet 'snippets/search_form.html', type='dataset', query=c.q, sorting=sorting, sorting_selected=c.sort_by_selected, count=c.page.item_count, facets=facets, show_empty=request.params, error=c.query_error, territory=c.territory %}
+      {% endblock %}
 
