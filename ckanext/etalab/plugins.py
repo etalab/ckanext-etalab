@@ -25,9 +25,14 @@
 
 import json
 import urllib2
+import urlparse
 
+from biryani1 import baseconv, custom_conv, states
 from ckan import plugins
 import ckan.plugins.toolkit as tk
+
+
+conv = custom_conv(baseconv, states)
 
 
 class EtalabDatasetFormPlugin(plugins.SingletonPlugin, tk.DefaultDatasetForm):
@@ -119,6 +124,9 @@ class EtalabDatasetFormPlugin(plugins.SingletonPlugin, tk.DefaultDatasetForm):
 
 
 class EtalabQueryPlugin(plugins.SingletonPlugin):
+    territoria_url = None
+
+    plugins.implements(plugins.IConfigurable)
     plugins.implements(plugins.IPackageController, inherit = True)
 
     def before_index(self, pkg_dict):
@@ -151,8 +159,8 @@ class EtalabQueryPlugin(plugins.SingletonPlugin):
         territory_kind_code_str = search_params.get('extras', {}).get('ext_territory')
         if territory_kind_code_str is not None:
             territory_kind, territory_code = territory_kind_code_str.split('/')
-            response = urllib2.urlopen('http://localhost:8090/api/v1/territory?kind={}&code={}'.format(territory_kind,
-                territory_code))
+            response = urllib2.urlopen(urlparse.urljoin(self.territoria_url,
+                '/api/v1/territory?kind={}&code={}'.format(territory_kind, territory_code)))
             response_dict = json.loads(response.read())
             territory = response_dict.get('data', {})
             ancestors_kind_code = territory.get('ancestors_kind_code')
@@ -175,6 +183,20 @@ class EtalabQueryPlugin(plugins.SingletonPlugin):
             else:
                 tk.response.delete_cookie('territory')
         return search_params
+
+    def configure(self, config):
+        etalab_config = conv.check(conv.struct(
+            {
+                'ckan.etalab.territoria_url': conv.pipe(
+                    conv.make_input_to_url(full = True, error_if_fragment = True, error_if_path = True,
+                        error_if_query = True),
+                    conv.not_none,
+                    ),
+                },
+            default = 'drop',
+            ))(config, state = conv.default_state)
+        config.update(etalab_config)
+        self.territoria_url = config['ckan.etalab.territoria_url']
 
 
 class EtalabPlugin(plugins.SingletonPlugin):
