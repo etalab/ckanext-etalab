@@ -34,6 +34,7 @@ ckan.module('autocomplete-territory', function (jQuery, _) {
                     },
                     url: 'http://ou.comarquage.fr/api/v1/autocomplete-territory?jsonp=?'
                 },
+                allowClear: true,
                 initSelection: function (element, callback) {
                     var count = 0;
                     var selectionData = [];
@@ -96,6 +97,7 @@ ckan.module('autocomplete-territory', function (jQuery, _) {
                     },
                     url: 'http://ou.comarquage.fr/api/v1/autocomplete-territory?jsonp=?'
                 },
+                allowClear: true,
                 initSelection: function (element, callback) {
                     var kindCode = $(element).val();
                     if (kindCode !== '') {
