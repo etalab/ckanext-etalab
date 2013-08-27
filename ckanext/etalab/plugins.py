@@ -177,9 +177,40 @@ class EtalabQueryPlugin(plugins.SingletonPlugin):
         return pkg_dict
 
     def before_search(self, search_params):
-        territory_kind_code_str = search_params.get('extras', {}).get('ext_territory')
-        if territory_kind_code_str is not None:
-            territory_kind, territory_code = territory_kind_code_str.split('/')
+        territory_str = search_params.get('extras', {}).get('ext_territory')
+        if territory_str is not None:
+            if '/' in territory_str:
+                territory_kind, territory_code = territory_str.strip().split('/')
+            else:
+                try:
+                    response = urllib2.urlopen(urlparse.urljoin(self.territoria_url,
+                        '/api/v1/autocomplete-territory?{}'.format(urllib.urlencode(dict(
+                            kind = [
+                                'ArrondissementOfCommuneOfFrance',
+                                'CommuneOfFrance',
+                                'Country',
+                                'DepartmentOfFrance',
+                                'OverseasCollectivityOfFrance',
+                                'RegionOfFrance',
+                                ],
+                            page_size = 1,
+                            term = territory_str.encode('utf-8'),
+                            ), doseq = True))))
+                except:
+                    territory_str = None
+                else:
+                    response_dict = json.loads(response.read())
+                    items = response_dict['data']['items']
+                    if items:
+                        item = items[0]
+                        territory_str = u'{}/{}'.format(item['kind'], item['code'])
+                        territory_kind = item['kind']
+                        territory_code = item['code']
+                    else:
+                        territory_str = None
+        if territory_str is None:
+            territory = None
+        else:
             response = urllib2.urlopen(urlparse.urljoin(self.territoria_url,
                 '/api/v1/territory?kind={}&code={}'.format(territory_kind, territory_code)))
             response_dict = json.loads(response.read())
@@ -190,24 +221,23 @@ class EtalabQueryPlugin(plugins.SingletonPlugin):
                     u'{}/{}'.format(ancestor_kind_code['kind'], ancestor_kind_code['code'])
                     for ancestor_kind_code in ancestors_kind_code
                     ]
-#                search_params['fq'] = '{} +covered_territories:{}'.format(search_params['fq'], territory_kind_code_str)
+#                search_params['fq'] = '{} +covered_territories:{}'.format(search_params['fq'], territory_str)
                 search_params['fq'] = '{} +covered_territories:({})'.format(search_params['fq'],
                     ' OR '.join(territories))
 
             # Add territory to c, to ensure that search.html can use it.
-            from ckan.lib.base import c
-            c.territory = territory_kind_code_str
+            tk.c.territory = territory_str
 
-            if territory:
-                # Store territory in a cookie after having removed "large" attributes.
-                territory = territory.copy()
-                territory.pop('ancestors', None)
-                territory.pop('ancestors_kind_code', None)
-                territory.pop('postal_distributions', None)
-                tk.response.set_cookie('territory', json.dumps(territory), httponly = True,
-                    secure = tk.request.scheme == 'https')
-            else:
-                tk.response.delete_cookie('territory')
+        if territory:
+            # Store territory in a cookie after having removed "large" attributes.
+            territory = territory.copy()
+            territory.pop('ancestors', None)
+            territory.pop('ancestors_kind_code', None)
+            territory.pop('postal_distributions', None)
+            tk.response.set_cookie('territory', json.dumps(territory), httponly = True,
+                secure = tk.request.scheme == 'https')
+        else:
+            tk.response.delete_cookie('territory')
         return search_params
 
     def configure(self, config):
