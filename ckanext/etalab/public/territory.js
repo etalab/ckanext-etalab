@@ -1,7 +1,6 @@
 ckan.module('autocomplete-territory', function (jQuery, _) {
     return {
         initialize: function () {
-            console.log('Ive been called for element: %o', this.el);
             $('.autocomplete-territories input').select2({
                 ajax: {
                     data: function (term, page) {
