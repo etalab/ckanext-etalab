@@ -24,10 +24,11 @@
 
 
 import json
+import urllib
 import urllib2
 import urlparse
 
-from biryani1 import baseconv, custom_conv, states
+from biryani1 import baseconv, custom_conv, states, strings
 from ckan import plugins
 import ckan.plugins.toolkit as tk
 
@@ -128,6 +129,26 @@ class EtalabQueryPlugin(plugins.SingletonPlugin):
 
     plugins.implements(plugins.IConfigurable)
     plugins.implements(plugins.IPackageController, inherit = True)
+    plugins.implements(plugins.IRoutes, inherit = True)
+
+    def after_show(self, context, pkg_dict):
+        try:
+            cookies = tk.request.cookies
+        except TypeError:
+            # TypeError: No object (name: request) has been registered for this thread.
+            cookies = None
+        if cookies is not None:
+            territory_json_str = cookies.get('territory')
+            if territory_json_str:
+                c = tk.c
+                try:
+                    c.territory = json.loads(territory_json_str)
+                except ValueError:
+                    pass
+                else:
+                    full_name = c.territory.get('full_name')
+                    if full_name is not None:
+                        c.territory['full_name_slug'] = strings.slugify(full_name)
 
     def before_index(self, pkg_dict):
         temporal_coverage_from = pkg_dict.get('temporal_coverage_from')
