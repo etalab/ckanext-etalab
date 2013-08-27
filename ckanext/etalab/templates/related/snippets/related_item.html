@@ -40,7 +40,7 @@ Example:
 {% set tooltip = _('Go to {related_item_type}').format(related_item_type=related.type|replace('_', ' ')|title) %}
 {% set related_description = related.description|replace('{full_name}', territory.full_name) %}
 {% set related_title = related.title|replace('{full_name}', territory.full_name) %}
-{% set related_url = related.url|replace('{depcom}', territory.code) %}
+{% set related_url = related.url|replace('{depcom}', territory.code)|replace('{full_name_slug}', territory.full_name_slug) %}
 <li class="related-item media-item" data-module="related-item">
   <img src="{{ related.image_url or placeholder_map[related.type] or '/base/images/placeholder-image.png' }}" alt="{{ related_title }}" class="media-image">
   <h3 class="media-heading">{{ related_title }}</h3>
