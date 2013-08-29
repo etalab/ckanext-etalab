@@ -26,6 +26,10 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 
 {% block package_basic_fields_custom %}
+    {% if data.supplier_org %}
+    <input type="hidden" name="supplier_org" value="{{ data.supplier_org }}" />
+    {% endif %}
+
     {% resource 'ckanext-etalab/territory.js' %}
     {% set territorial_coverage_attrs = {'data-module': 'autocomplete-territory', 'multiple': 'multiple'} %}
     {{ form.input('territorial_coverage', label='Territoires couverts', id='field-territorial_coverage', placeholder='Entrez une commune, un département ou une région...', value=data.territorial_coverage, error=errors.territorial_coverage, classes=['autocomplete-territories', 'control-full'], attrs=territorial_coverage_attrs) }}

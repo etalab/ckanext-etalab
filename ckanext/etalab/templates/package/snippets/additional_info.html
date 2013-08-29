@@ -26,5 +26,21 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 
 {% block package_additional_info %}
-  {% snippet "package/snippets/additional_info.html", pkg_dict=h.reject_extras(pkg, 'supplier_org', 'territorial_coverage', 'territorial_coverage_granularity') %}
+    {% set supplier = pkg_dict.supplier %}
+    {% if supplier %}
+        <tr>
+            <th scope="row" class="dataset-label">Fournisseur</th>
+            <td class="dataset-details">{{ supplier.title or supplier.name }}</td>
+        </tr>
+    {% endif %}
+
+    {% if pkg_dict.territorial_coverage %}
+        <tr>
+            <th scope="row" class="dataset-label">Territoires couverts</th>
+            <td class="dataset-details">{{ pkg_dict.territorial_coverage }}</td>
+        </tr>
+    {% endif %}
+
+    {{ super() }}
 {% endblock %}
+

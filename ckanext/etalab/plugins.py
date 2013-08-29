@@ -30,7 +30,10 @@ import urlparse
 
 from biryani1 import baseconv, custom_conv, states, strings
 from ckan import plugins
+from ckan.lib import dictization
+from ckan.lib.navl import dictization_functions as df
 import ckan.plugins.toolkit as tk
+from sqlalchemy.sql import select
 
 
 conv = custom_conv(baseconv, states)
@@ -44,6 +47,12 @@ class EtalabDatasetFormPlugin(plugins.SingletonPlugin, tk.DefaultDatasetForm):
     def _modify_package_schema(self, schema):
         from ckan.logic import converters
         schema.update(dict(
+            supplier_org = [
+                tk.get_validator('ignore_missing'),
+                supplier_org_validator,
+                unicode,
+                convert_to_extras,  # tk.get_converter('convert_to_extras') is buggy.
+                ],
             temporal_coverage_from = [
                 tk.get_validator('ignore_missing'),
                 converters.date_to_db,
@@ -91,6 +100,10 @@ class EtalabDatasetFormPlugin(plugins.SingletonPlugin, tk.DefaultDatasetForm):
         from ckan.logic import converters
         schema = super(EtalabDatasetFormPlugin, self).show_package_schema()
         schema.update(dict(
+            supplier_org = [
+                tk.get_converter('convert_from_extras'),
+                tk.get_validator('ignore_missing'),
+                ],
             temporal_coverage_from = [
                 tk.get_converter('convert_from_extras'),
                 tk.get_validator('ignore_missing'),
@@ -149,6 +162,20 @@ class EtalabQueryPlugin(plugins.SingletonPlugin):
                     full_name = c.territory.get('full_name')
                     if full_name is not None:
                         c.territory['full_name_slug'] = strings.slugify(full_name)
+
+        # Add supplier to pkg_dict
+        from ckan.lib.dictization import model_dictize
+        supplier_org = pkg_dict.get('supplier_org')
+        if supplier_org is not None:
+            # Code derivated from model_dictize.package_dictize.
+            model = context['model']
+            group_rev = model.group_revision_table
+            q = select([group_rev]) \
+                .where(group_rev.c.id == supplier_org) \
+                .where(group_rev.c.state == 'active')
+            result = model_dictize._execute_with_revision(q, group_rev, context)
+            organizations = dictization.obj_list_dictize(result, context)
+            pkg_dict['supplier'] = organizations[0] if organizations else None
 
     def before_index(self, pkg_dict):
         temporal_coverage_from = pkg_dict.get('temporal_coverage_from')
@@ -275,7 +302,7 @@ class EtalabPlugin(plugins.SingletonPlugin):
 
 def convert_to_extras(key, data, errors, context):
     # Replace ckan.logic.converters.convert_to_extras to ensure that extras are appended after existing extras.
-    # Otherwise they will be erased by ckan.lib.navl.dictization_functions.flatten.
+    # Otherwise they will be erased by df.flatten.
     assert isinstance(key, tuple) and len(key) == 1
     last_index = -1
     for key_tuple in data.iterkeys():
@@ -283,6 +310,19 @@ def convert_to_extras(key, data, errors, context):
             last_index = max(last_index, key_tuple[1])
     data[('extras', last_index + 1, 'key')] = key[-1]
     data[('extras', last_index + 1, 'value')] = data[key]
+
+
+def supplier_org_validator(key, data, errors, context):
+    value = data.get(key)
+    if value is df.missing or not value:
+        data.pop(key, None)
+        raise df.StopOnError
+
+    model = context['model']
+    group = model.Group.get(value)
+    if not group:
+        raise Invalid(_('Organization does not exist'))
+    data[key] = group.id
 
 
 def reject_extras(container, *names):
