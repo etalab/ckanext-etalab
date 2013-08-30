@@ -30,7 +30,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
     {% if supplier %}
         <tr>
             <th scope="row" class="dataset-label">Fournisseur</th>
-            <td class="dataset-details">{{ supplier.title or supplier.name }}</td>
+            <td class="dataset-details">{% link_for supplier.title or supplier.name, controller='organization', action='about', id=supplier.name %}</td>
         </tr>
     {% endif %}
 
