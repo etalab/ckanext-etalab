@@ -26,5 +26,5 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 
 {% block package_additional_info %}
-  {% snippet "package/snippets/additional_info.html", pkg_dict=h.reject_extras(pkg, 'supplier_org', 'territorial_coverage', 'territorial_coverage_granularity') %}
+  {% snippet "package/snippets/additional_info.html", pkg_dict=h.reject_extras(pkg, 'supplier_id', 'territorial_coverage', 'territorial_coverage_granularity') %}
 {% endblock %}

@@ -26,8 +26,8 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 
 {% block package_basic_fields_custom %}
-    {% if data.supplier_org %}
-    <input type="hidden" name="supplier_org" value="{{ data.supplier_org }}" />
+    {% if data.supplier_id %}
+    <input type="hidden" name="supplier_id" value="{{ data.supplier_id }}" />
     {% endif %}
 
     {% resource 'ckanext-etalab/territory.js' %}

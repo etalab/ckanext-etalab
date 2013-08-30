@@ -47,9 +47,9 @@ class EtalabDatasetFormPlugin(plugins.SingletonPlugin, tk.DefaultDatasetForm):
     def _modify_package_schema(self, schema):
         from ckan.logic import converters
         schema.update(dict(
-            supplier_org = [
+            supplier_id = [
                 tk.get_validator('ignore_missing'),
-                supplier_org_validator,
+                supplier_id_validator,
                 unicode,
                 convert_to_extras,  # tk.get_converter('convert_to_extras') is buggy.
                 ],
@@ -100,7 +100,7 @@ class EtalabDatasetFormPlugin(plugins.SingletonPlugin, tk.DefaultDatasetForm):
         from ckan.logic import converters
         schema = super(EtalabDatasetFormPlugin, self).show_package_schema()
         schema.update(dict(
-            supplier_org = [
+            supplier_id = [
                 tk.get_converter('convert_from_extras'),
                 tk.get_validator('ignore_missing'),
                 ],
@@ -165,13 +165,13 @@ class EtalabQueryPlugin(plugins.SingletonPlugin):
 
         # Add supplier to pkg_dict
         from ckan.lib.dictization import model_dictize
-        supplier_org = pkg_dict.get('supplier_org')
-        if supplier_org is not None:
+        supplier_id = pkg_dict.get('supplier_id')
+        if supplier_id is not None:
             # Code derivated from model_dictize.package_dictize.
             model = context['model']
             group_rev = model.group_revision_table
             q = select([group_rev]) \
-                .where(group_rev.c.id == supplier_org) \
+                .where(group_rev.c.id == supplier_id) \
                 .where(group_rev.c.state == 'active')
             result = model_dictize._execute_with_revision(q, group_rev, context)
             organizations = dictization.obj_list_dictize(result, context)
@@ -312,7 +312,7 @@ def convert_to_extras(key, data, errors, context):
     data[('extras', last_index + 1, 'value')] = data[key]
 
 
-def supplier_org_validator(key, data, errors, context):
+def supplier_id_validator(key, data, errors, context):
     value = data.get(key)
     if value is df.missing or not value:
         data.pop(key, None)
