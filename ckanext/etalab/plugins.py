@@ -5,7 +5,7 @@
 # By: Emmanuel Raviart <emmanuel@raviart.com>
 #
 # Copyright (C) 2013 Emmanuel Raviart
-# http://gitorious.org/etalab/ckanext-etalab
+# http://github.com/etalab/ckanext-etalab
 #
 # This file is part of CKANExt-Etalab.
 #

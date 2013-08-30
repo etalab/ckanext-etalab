@@ -6,7 +6,7 @@
 # By: Emmanuel Raviart <emmanuel@raviart.com>
 #
 # Copyright (C) 2013 Emmanuel Raviart
-# http://gitorious.org/etalab/ckanext-etalab
+# http://github.com/etalab/ckanext-etalab
 #
 # This file is part of CKANExt-Etalab.
 #
@@ -61,7 +61,7 @@ setup(
     keywords = 'ckan etalab extension france government opendata plugin',
     license = 'http://www.fsf.org/licensing/licenses/agpl-3.0.html',
     long_description = '\n'.join(doc_lines[2:]),
-    url = 'https://www.gitorious.org/etalab/ckanext-etalab',
+    url = 'https://www.github.com/etalab/ckanext-etalab',
 
     entry_points = """
         [ckan.plugins]
