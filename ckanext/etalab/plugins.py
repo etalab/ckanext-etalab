@@ -263,8 +263,10 @@ class EtalabQueryPlugin(plugins.SingletonPlugin):
             territory.pop('postal_distributions', None)
             tk.response.set_cookie('territory', json.dumps(territory), httponly = True,
                 secure = tk.request.scheme == 'https')
+            tk.response.set_cookie('territory-infos', u'{kind}/{code}|{main_postal_distribution}'.format(**territory))
         else:
             tk.response.delete_cookie('territory')
+            tk.response.delete_cookie('territory-infos')
         return search_params
 
     def configure(self, config):
