@@ -1,0 +1,40 @@
+{#
+CKANExt-Etalab -- CKAN extension for Etalab
+By: Emmanuel Raviart <emmanuel@raviart.com>
+
+Copyright (C) 2013 Emmanuel Raviart
+http://github.com/etalab/ckanext-etalab
+
+This file is part of CKANExt-Etalab.
+
+CKANExt-Etalab is free software; you can redistribute it and/or modify
+it under the terms of the GNU Affero General Public License as
+published by the Free Software Foundation, either version 3 of the
+License, or (at your option) any later version.
+
+CKANExt-Etalab is distributed in the hope that it will be useful,
+but WITHOUT ANY WARRANTY; without even the implied warranty of
+MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+GNU Affero General Public License for more details.
+
+You should have received a copy of the GNU Affero General Public License
+along with this program.  If not, see <http://www.gnu.org/licenses/>.
+#}
+
+
+{% import "macros/form.html" as form %}
+
+
+<form class="form-horizontal" action="" method="post">
+  {{ form.errors(error_summary) }}
+  {{ form.input("name", id="field-username", label=_("Username"), placeholder="username", value=data.name, error=errors.name, classes=["control-medium"]) }}
+  {{ form.input("fullname", id="field-fullname", label=_("Full Name"), placeholder="Joe Bloggs", value=data.fullname, error=errors.fullname, classes=["control-medium"]) }}
+  {{ form.input("email", id="field-email", label=_("Email"), type="email", placeholder="joe@example.com", value=data.email, error=errors.email, classes=["control-medium"]) }}
+  {{ form.input("password1", id="field-password", label=_("Password"), type="password", placeholder="••••••••", value=data.password1, error=errors.password1, classes=["control-medium"]) }}
+  {{ form.input("password2", id="field-confirm-password", label=_("Confirm"), type="password", placeholder="••••••••", value=data.password2, error=errors.password1, classes=["control-medium"]) }}
+  <p> J'ai lu et j'adhère aux <a href="#">conditions générales du service</a>, en particulier je comprends que data.gouv.fr valorise plus la documentation, la fiabilisation et l'enrichissement de données, la mise en évidence de corrélations inédites que les interprétations définitives ou partisanes.</p>
+  <p>Il appartient à la communauté des membres, tous engagés sous leur identité de personnes morales ou physiques, de veiller à la qualité du contenu qu'elle produit.</p>
+  <div class="form-actions">
+    <button class="btn btn-primary" type="submit" name="save">{{ _("Create Account") }}</button>
+  </div>
+</form>
