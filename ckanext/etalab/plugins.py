@@ -193,6 +193,10 @@ class EtalabQueryPlugin(plugins.SingletonPlugin):
                 str(year)
                 for year in range(int(year_from), int(year_to) + 1)
                 ]
+        # Compute temporal weight.
+        # When no temporal coverage is given, consider that it is less than a year (0.9), to boost datasets with a
+        # temporal coverage.
+        temporal_weight = max(0.9, len(pkg_dict.get('covered_years', [])))
 
         territorial_coverage = pkg_dict.get('territorial_coverage')
         if territorial_coverage:
@@ -201,6 +205,43 @@ class EtalabQueryPlugin(plugins.SingletonPlugin):
                 for covered_territory in territorial_coverage.split(',')
                 if covered_territory
                 ))
+            territorial_weight = min(1.0, sum(
+                dict(
+                    ArrondissementOfCommuneOfFrance = 1.0 / 36700.0,
+                    ArrondissementOfFrance = 1.0 / 342.0,
+                    AssociatedCommuneOfFrance = 1.0 / 36700.0,
+                    CantonalFractionOfCommuneOfFrance = 1.0 / 36700.0,
+                    CantonCityOfFrance = 1.0 / 3785.0,
+                    CantonOfFrance = 1.0 / 4055.0,
+                    CatchmentAreaOfFrance = 1.0 / 1666.0,
+                    CommuneOfFrance = 1.0 / 36700.0,
+                    Country = 1.0,
+                    DepartmentOfFrance = 1.0 / 101.0,
+                    EmploymentAreaOfFrance = 1.0 / 322.0,
+                    IntercommunalityOfFrance = 1.0 / 2582.0,
+                    InternationalOrganization = 1.0,
+                    JusticeAreaOfFrance = 1.0 / 316.0,  # TODO: Justice areas have not the same size.
+                    MetropoleOfCountry = 22.0 / 27.0,
+                    Mountain = 8857.0 / (36700.0 * 7.0),
+                    OverseasCollectivityOfFrance = 1.0 / 109.0,
+                    OverseasOfCountry = 5.0 / 27.0,
+                    PaysOfFrance = 28849.0 / (36700.0 * 358.0),
+                    RegionalNatureParkOfFrance = 4126.0 / (36700.0 * 47.0),
+                    RegionOfFrance = 1.0 / 27.0,
+                    UrbanAreaOfFrance = 1.0 / 796.0,
+                    UrbanTransportsPerimeterOfFrance = 4077.0 / (36700.0 * 297.0),
+                    UrbanUnitOfFrance = 1.0 / 2390.0,
+                    ).get(covered_territory.split('/', 1)[0], 1.0 / 40000.0)
+                for covered_territory in territorial_coverage.split(',')
+                if covered_territory
+                ))
+        else:
+            # When no territorial coverage is given, consider that it is less than a commune, to boost datasets with a
+            # temporal coverage.
+            territorial_weight = 1.0 / 40000.0
+
+        pkg_dict['weight'] = temporal_weight + 100.0 * territorial_weight
+
         return pkg_dict
 
     def before_search(self, search_params):
@@ -254,6 +295,8 @@ class EtalabQueryPlugin(plugins.SingletonPlugin):
 
             # Add territory to c, to ensure that search.html can use it.
             tk.c.territory = territory_str
+
+        search_params['q'] = u'{} +_val_:"weight"'.format(search_params['q'])
 
         if territory:
             # Store territory in a cookie after having removed "large" attributes.
