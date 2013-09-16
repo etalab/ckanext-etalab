@@ -366,7 +366,7 @@ def supplier_id_validator(key, data, errors, context):
     model = context['model']
     group = model.Group.get(value)
     if not group:
-        raise Invalid(_('Organization does not exist'))
+        raise df.Invalid(tk._('Organization does not exist'))
     data[key] = group.id
 
 
