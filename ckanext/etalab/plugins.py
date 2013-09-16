@@ -240,7 +240,7 @@ class EtalabQueryPlugin(plugins.SingletonPlugin):
             # temporal coverage.
             territorial_weight = 1.0 / 40000.0
 
-        pkg_dict['weight'] = temporal_weight + 100.0 * territorial_weight
+        pkg_dict['weight'] = temporal_weight * territorial_weight
 
         return pkg_dict
 
