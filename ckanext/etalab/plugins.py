@@ -280,11 +280,9 @@ class EtalabQueryPlugin(plugins.SingletonPlugin):
             # temporal coverage.
             territorial_weight = 1.0 / 40000.0
 
-        # Add weight to index.
-        pkg_dict['weight'] = 40000.0 * temporal_weight * territorial_weight
-
         # Add text of related.
         related_fragments = []
+        related_weight = 1.0
         for related_dataset in model.Session.query(model.RelatedDataset).filter(
                 model.RelatedDataset.dataset_id == pkg_dict['id'],
                 model.RelatedDataset.status == u'active',
@@ -295,8 +293,21 @@ class EtalabQueryPlugin(plugins.SingletonPlugin):
                     related_fragments.append(related.title)
                 if related.description:
                     related_fragments.append(related.description)
+                related_weight += 1.0
         if related_fragments:
             pkg_dict['related'] = u'\n'.join(related_fragments)
+
+        organization_id = pkg_dict.get('owner_org')
+        if organization_id is not None:
+            certified_public_service = model.Session.query(plugin_model.CertifiedPublicService).filter(
+                plugin_model.CertifiedPublicService.organization_id == organization_id,
+                ).first()
+        else:
+            certified_public_service = None
+        certified_weight = 2.0 if certified_public_service is not None else 1.0
+
+        # Add weight to index.
+        pkg_dict['weight'] = certified_weight * related_weight * (40000.0 * temporal_weight) * territorial_weight
 
         return pkg_dict
 
