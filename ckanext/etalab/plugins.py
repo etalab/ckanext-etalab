@@ -235,6 +235,7 @@ class EtalabQueryPlugin(plugins.SingletonPlugin):
         # temporal coverage.
         temporal_weight = max(0.9, len(pkg_dict.get('covered_years', [])))
 
+        # Add territorial coverage to index.
         territorial_coverage = pkg_dict.get('territorial_coverage')
         if territorial_coverage:
             pkg_dict['covered_territories'] = sorted(set(
@@ -277,8 +278,10 @@ class EtalabQueryPlugin(plugins.SingletonPlugin):
             # temporal coverage.
             territorial_weight = 1.0 / 40000.0
 
+        # Add weight to index.
         pkg_dict['weight'] = 40000.0 * temporal_weight * territorial_weight
 
+        # Add text of related.
         related_fragments = []
         for related_dataset in model.Session.query(model.RelatedDataset).filter(
                 model.RelatedDataset.dataset_id == pkg_dict['id'],
