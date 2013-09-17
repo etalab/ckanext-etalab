@@ -138,11 +138,13 @@ class EtalabDatasetFormPlugin(plugins.SingletonPlugin, tk.DefaultDatasetForm):
 
 
 class EtalabQueryPlugin(plugins.SingletonPlugin):
+    domain_object_modification_observers = plugins.PluginImplementations(plugins.IDomainObjectModification)
     territoria_url = None
 
     plugins.implements(plugins.IConfigurable)
     plugins.implements(plugins.IPackageController, inherit = True)
     plugins.implements(plugins.IRoutes, inherit = True)
+    plugins.implements(plugins.ISession, inherit = True)
 
     def after_show(self, context, pkg_dict):
         try:
@@ -177,7 +179,42 @@ class EtalabQueryPlugin(plugins.SingletonPlugin):
             organizations = dictization.obj_list_dictize(result, context)
             pkg_dict['supplier'] = organizations[0] if organizations else None
 
+    def before_commit(self, session):
+        # Code inspired from ckan.model.modification.DomainObjectModificationExtension.
+        from ckan import model
+
+        session.flush()
+        if not hasattr(session, '_object_cache'):
+            return
+        object_cache = session._object_cache
+
+        for action, instances in (
+                ('create', object_cache['new']),
+                ('delete', object_cache['deleted']),
+                ('update', object_cache['changed']),
+                ):
+            for instance in instances:
+                if isinstance(instance, model.Activity):
+                    # Hack that uses activity to detect when a Related has been created and to retrieve its dataset.
+                    # Because when a related is created, its dataset is not known when before_commit is called.
+                    if action == 'create' and instance.activity_type == u'new related item':
+                        operation = model.DomainObjectOperation.changed
+                        package = session.query(model.Package).get(instance.data['dataset']['id'])
+                        for observer in self.domain_object_modification_observers:
+                            observer.notify(package, operation)
+                elif isinstance(instance, model.Related):
+                    # Note: "create" action is handled using Activity, because there is no way to retrieve the related
+                    # dataset at creation time (RelatedDataset doesn't exist yet).
+                    if action != 'create':
+                        operation = model.DomainObjectOperation.changed
+                        for package in instance.datasets:
+                            for observer in self.domain_object_modification_observers:
+                                observer.notify(package, operation)
+
     def before_index(self, pkg_dict):
+        from ckan import model
+
+        # Add temporal coverage to index.
         temporal_coverage_from = pkg_dict.get('temporal_coverage_from')
         year_from = temporal_coverage_from.split('-', 1)[0] if temporal_coverage_from is not None else None
         temporal_coverage_to = pkg_dict.get('temporal_coverage_to')
@@ -241,6 +278,20 @@ class EtalabQueryPlugin(plugins.SingletonPlugin):
             territorial_weight = 1.0 / 40000.0
 
         pkg_dict['weight'] = 40000.0 * temporal_weight * territorial_weight
+
+        related_fragments = []
+        for related_dataset in model.Session.query(model.RelatedDataset).filter(
+                model.RelatedDataset.dataset_id == pkg_dict['id'],
+                model.RelatedDataset.status == u'active',
+                ):
+            related = related_dataset.related
+            if related is not None:
+                if related.title:
+                    related_fragments.append(related.title)
+                if related.description:
+                    related_fragments.append(related.description)
+        if related_fragments:
+            pkg_dict['related'] = u'\n'.join(related_fragments)
 
         return pkg_dict
 
