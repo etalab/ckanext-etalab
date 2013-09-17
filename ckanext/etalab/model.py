@@ -27,7 +27,6 @@ import logging
 
 from ckan import model
 from ckan.model import meta
-from ckan.model.types import make_uuid
 import sqlalchemy as sa
 from sqlalchemy import orm, types
 
