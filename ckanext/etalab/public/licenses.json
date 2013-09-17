@@ -37,7 +37,7 @@
     "maintainer": "",
     "status": "active",
     "title": "Open Data Commons Public Domain Dedication and Licence (PDDL)",
-    "url": "http://www.opendefinition.org/licenses/odc-pddl"
+    "url": "http://opendatacommons.org/licenses/pddl/summary/"
   },
   {
     "domain_content": false,
@@ -63,7 +63,7 @@
     "maintainer": "",
     "status": "active",
     "title": "Open Data Commons Attribution License",
-    "url": "http://www.opendefinition.org/licenses/odc-by"
+    "url": "http://opendatacommons.org/licenses/by/summary/"
   },
   {
     "domain_content": true,
