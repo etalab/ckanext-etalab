@@ -35,6 +35,8 @@ from ckan.lib.navl import dictization_functions as df
 import ckan.plugins.toolkit as tk
 from sqlalchemy.sql import select
 
+from . import model as plugin_model
+
 
 conv = custom_conv(baseconv, states)
 
@@ -379,6 +381,8 @@ class EtalabQueryPlugin(plugins.SingletonPlugin):
             ))(config, state = conv.default_state)
         config.update(etalab_config)
         self.territoria_url = config['ckan.etalab.territoria_url']
+
+        plugin_model.setup()
 
 
 class EtalabPlugin(plugins.SingletonPlugin):
