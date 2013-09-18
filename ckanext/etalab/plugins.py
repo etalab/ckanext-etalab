@@ -307,7 +307,7 @@ class EtalabQueryPlugin(plugins.SingletonPlugin):
         certified_weight = 2.0 if certified_public_service is not None else 1.0
 
         # Add weight to index.
-        pkg_dict['weight'] = certified_weight * related_weight * (40000.0 * temporal_weight) * territorial_weight
+        pkg_dict['weight'] = certified_weight * related_weight * temporal_weight * (40000.0 * territorial_weight)
 
         return pkg_dict
 
@@ -426,19 +426,6 @@ def convert_to_extras(key, data, errors, context):
     data[('extras', last_index + 1, 'value')] = data[key]
 
 
-def supplier_id_validator(key, data, errors, context):
-    value = data.get(key)
-    if value is df.missing or not value:
-        data.pop(key, None)
-        raise df.StopOnError
-
-    model = context['model']
-    group = model.Group.get(value)
-    if not group:
-        raise df.Invalid(tk._('Organization does not exist'))
-    data[key] = group.id
-
-
 def reject_extras(container, *names):
     extras = container.get('extras')
     if extras:
@@ -451,13 +438,14 @@ def reject_extras(container, *names):
     return container
 
 
-def smart_viewers(package):
-    """Helper function to extract smart viewers from the related of a package."""
-    # TODO
-#    print package['id']
-    return []
-#    return [
-#        related
-#        for related in package.related
-#        if related.type == 'smart_viewer'
-#        ]
+def supplier_id_validator(key, data, errors, context):
+    value = data.get(key)
+    if value is df.missing or not value:
+        data.pop(key, None)
+        raise df.StopOnError
+
+    model = context['model']
+    group = model.Group.get(value)
+    if not group:
+        raise df.Invalid(tk._('Organization does not exist'))
+    data[key] = group.id
