@@ -158,59 +158,5 @@
     "status": "active",
     "title": "Other (Attribution)",
     "url": ""
-  },
-  {
-    "domain_content": true,
-    "domain_data": true,
-    "domain_software": false,
-    "family": "",
-    "id": "uk-ogl",
-    "is_okd_compliant": false,
-    "is_osi_compliant": false,
-    "maintainer": "",
-    "status": "active",
-    "title": "UK Open Government Licence (OGL)",
-    "url": "http://reference.data.gov.uk/id/open-government-licence"
-  },
-  {
-    "domain_content": false,
-    "domain_data": false,
-    "domain_software": false,
-    "family": "",
-    "id": "cc-nc",
-    "is_okd_compliant": false,
-    "is_osi_compliant": false,
-    "maintainer": "",
-    "status": "active",
-    "title": "Creative Commons Non-Commercial (Any)",
-    "url": "http://creativecommons.org/licenses/by-nc/2.0/"
-  },
-  {
-    "domain_content": false,
-    "domain_data": false,
-    "domain_software": false,
-    "family": "",
-    "id": "other-nc",
-    "is_generic": true,
-    "is_okd_compliant": false,
-    "is_osi_compliant": false,
-    "maintainer": "",
-    "status": "active",
-    "title": "Other (Non-Commercial)",
-    "url": ""
-  },
-  {
-    "domain_content": false,
-    "domain_data": false,
-    "domain_software": false,
-    "family": "",
-    "id": "other-closed",
-    "is_generic": true,
-    "is_okd_compliant": false,
-    "is_osi_compliant": false,
-    "maintainer": "",
-    "status": "active",
-    "title": "Other (Not Open)",
-    "url": ""
   }
 ]
