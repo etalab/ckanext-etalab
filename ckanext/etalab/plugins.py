@@ -309,10 +309,10 @@ class EtalabQueryPlugin(plugins.SingletonPlugin):
                 ).first()
         else:
             certified_public_service = None
-        certified_weight = 2.0 if certified_public_service is not None else 1.0
+        certified_weight = 2.0 if certified_public_service is not None else 0.5
 
-        # Add weight to index and ensure that 0 < weight <= 2.
-        pkg_dict['weight'] = certified_weight * related_weight * temporal_weight * territorial_weight / 8.0
+        # Add weight to index and ensure that 0 < weight <= 8.
+        pkg_dict['weight'] = certified_weight * related_weight * temporal_weight * territorial_weight / 2.0
 
         return pkg_dict
 
