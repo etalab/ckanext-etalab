@@ -284,6 +284,47 @@ class EtalabQueryPlugin(plugins.SingletonPlugin):
         # Convert number between 1 / 40000 and 1 to a number between 0.9 and 2
         territorial_weight = normalize_weight(36700.0 * territorial_weight)
 
+        # Compute weight of territorial granularity.
+        territorial_coverage_granularity = pkg_dict.get('territorial_coverage_granularity')
+        if territorial_coverage_granularity:
+            territorial_coverage_granularity = {
+                'commune': 'CommuneOfFrance',
+                'canton': 'CantonOfFrance',
+                'epci': 'IntercommunalityOfFrance',
+                'department': 'DepartmentOfFrance',
+                'region': 'RegionOfFrance',
+                'france': 'Country',
+                }.get(territorial_coverage_granularity, territorial_coverage_granularity)
+            territorial_granularity_weight = dict(
+                ArrondissementOfCommuneOfFrance = 36700.0,
+                ArrondissementOfFrance = 342.0,
+                AssociatedCommuneOfFrance = 36700.0,
+                CantonalFractionOfCommuneOfFrance = 36700.0,
+                CantonCityOfFrance = 3785.0,
+                CantonOfFrance = 4055.0,
+                CatchmentAreaOfFrance = 1666.0,
+                CommuneOfFrance = 36700.0,
+                Country = 1.0,
+                DepartmentOfFrance = 101.0,
+                EmploymentAreaOfFrance = 322.0,
+                IntercommunalityOfFrance = 2582.0,
+                InternationalOrganization = 1.0,
+                JusticeAreaOfFrance = 316.0,  # TODO: Justice areas have not the same size.
+                MetropoleOfCountry = 27.0,
+                Mountain = (36700.0 * 7.0) / 8857.0,
+                OverseasCollectivityOfFrance = 109.0,
+                OverseasOfCountry = 27.0 / 5.0,
+                PaysOfFrance = (36700.0 * 358.0) / 28849.0,
+                RegionalNatureParkOfFrance = (36700.0 * 47.0) / 4126.0,
+                RegionOfFrance = 27.0,
+                UrbanAreaOfFrance = 796.0,
+                UrbanTransportsPerimeterOfFrance = (36700.0 * 297.0) / 4077.0,
+                UrbanUnitOfFrance = 2390.0,
+                ).get(territorial_coverage_granularity, 0.9)
+        else:
+            territorial_granularity_weight = 0.9
+        territorial_granularity_weight = normalize_weight(territorial_granularity_weight)
+
         # Add text of related.
         related_fragments = []
         related_weight = 1.0
@@ -312,7 +353,8 @@ class EtalabQueryPlugin(plugins.SingletonPlugin):
         certified_weight = 2.0 if certified_public_service is not None else 0.5
 
         # Add weight to index and ensure that 0 < weight <= 8.
-        pkg_dict['weight'] = certified_weight * related_weight * temporal_weight * territorial_weight / 2.0
+        pkg_dict['weight'] = (certified_weight * related_weight * temporal_weight * territorial_weight
+            * territorial_granularity_weight) / 4.0
 
         return pkg_dict
 
