@@ -24,6 +24,7 @@
 
 
 import json
+import math
 import urllib
 import urllib2
 import urlparse
@@ -236,6 +237,7 @@ class EtalabQueryPlugin(plugins.SingletonPlugin):
         # When no temporal coverage is given, consider that it is less than a year (0.9), to boost datasets with a
         # temporal coverage.
         temporal_weight = max(0.9, len(pkg_dict.get('covered_years', [])))
+        temporal_weight = normalize_weight(temporal_weight)
 
         # Add territorial coverage to index.
         territorial_coverage = pkg_dict.get('territorial_coverage')
@@ -279,6 +281,8 @@ class EtalabQueryPlugin(plugins.SingletonPlugin):
             # When no territorial coverage is given, consider that it is less than a commune, to boost datasets with a
             # temporal coverage.
             territorial_weight = 1.0 / 40000.0
+        # Convert number between 1 / 40000 and 1 to a number between 0.9 and 2
+        territorial_weight = normalize_weight(36700.0 * territorial_weight)
 
         # Add text of related.
         related_fragments = []
@@ -296,6 +300,7 @@ class EtalabQueryPlugin(plugins.SingletonPlugin):
                 related_weight += 1.0
         if related_fragments:
             pkg_dict['related'] = u'\n'.join(related_fragments)
+        related_weight = normalize_weight(related_weight)
 
         organization_id = pkg_dict.get('owner_org')
         if organization_id is not None:
@@ -306,8 +311,8 @@ class EtalabQueryPlugin(plugins.SingletonPlugin):
             certified_public_service = None
         certified_weight = 2.0 if certified_public_service is not None else 1.0
 
-        # Add weight to index.
-        pkg_dict['weight'] = certified_weight * related_weight * temporal_weight * (40000.0 * territorial_weight)
+        # Add weight to index and ensure that 0 < weight <= 2.
+        pkg_dict['weight'] = certified_weight * related_weight * temporal_weight * territorial_weight / 8.0
 
         return pkg_dict
 
@@ -447,6 +452,12 @@ def convert_to_extras(key, data, errors, context):
             last_index = max(last_index, key_tuple[1])
     data[('extras', last_index + 1, 'key')] = key[-1]
     data[('extras', last_index + 1, 'value')] = data[key]
+
+
+def normalize_weight(weight):
+    # Convert a weight between 0 and infinite to a number between 0 and 2.
+    # cf http://en.wikipedia.org/wiki/Inverse_trigonometric_functions
+    return math.atan(weight) * 4 / math.pi
 
 
 def reject_extras(container, *names):
