@@ -324,8 +324,6 @@ class EtalabQueryPlugin(plugins.SingletonPlugin):
         else:
             territorial_granularity_weight = 0.9
         territorial_granularity_weight = normalize_weight(territorial_granularity_weight)
-        # TODO: Remove.
-        territorial_granularity_weight = 2.0
 
         # Add text of related.
         related_fragments = []
