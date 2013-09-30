@@ -412,7 +412,7 @@ class EtalabQueryPlugin(plugins.SingletonPlugin):
             # Add territory to c, to ensure that search.html can use it.
             tk.c.territory = territory_str
 
-        search_params['q'] = u'{} +_val_:"weight"'.format(search_params['q'])
+        search_params['q'] = u'{} +_val_:"weight"^8'.format(search_params['q'])
 
         if territory:
             # Store territory in a cookie after having removed "large" attributes.
