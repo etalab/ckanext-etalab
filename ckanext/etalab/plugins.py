@@ -288,6 +288,8 @@ class EtalabQueryPlugin(plugins.SingletonPlugin):
         territorial_coverage_granularity = pkg_dict.get('territorial_coverage_granularity')
         if territorial_coverage_granularity:
             territorial_coverage_granularity = {
+                'poi': 'CommuneOfFrance',
+                'iris': 'CommuneOfFrance',
                 'commune': 'CommuneOfFrance',
                 'canton': 'CantonOfFrance',
                 'epci': 'IntercommunalityOfFrance',

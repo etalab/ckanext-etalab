@@ -35,6 +35,8 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
     {{ form.input('territorial_coverage', label='Territoires couverts', id='field-territorial_coverage', placeholder='Entrez une commune, un département ou une région...', value=data.territorial_coverage, error=errors.territorial_coverage, classes=['autocomplete-territories', 'control-full'], attrs=territorial_coverage_attrs) }}
     {{ form.select('territorial_coverage_granularity', id = 'field-territorial_coverage_granularity', label = 'Granularité territoriale des données', options = [
             {'value': '', 'text': ''},
+            {'value': 'poi', 'text': "Point d'intérêt"},
+            {'value': 'iris', 'text': 'Iris (quartier Insee)'},
             {'value': 'commune', 'text': 'Commune'},
             {'value': 'canton', 'text': 'Canton'},
             {'value': 'epci', 'text': 'Intercommunalité (EPCI)'},
