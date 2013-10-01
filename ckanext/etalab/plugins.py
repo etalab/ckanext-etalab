@@ -24,7 +24,6 @@
 
 
 import json
-import math
 import urllib
 import urllib2
 import urlparse
@@ -36,6 +35,7 @@ from ckan.lib.navl import dictization_functions as df
 import ckan.plugins.toolkit as tk
 from sqlalchemy.sql import select
 
+from . import formulas
 from . import model as plugin_model
 
 
@@ -237,7 +237,7 @@ class EtalabQueryPlugin(plugins.SingletonPlugin):
         # When no temporal coverage is given, consider that it is less than a year (0.9), to boost datasets with a
         # temporal coverage.
         temporal_weight = max(0.9, len(pkg_dict.get('covered_years', [])))
-        temporal_weight = normalize_weight(temporal_weight)
+        temporal_weight = formulas.normalize_weight(temporal_weight)
 
         # Add territorial coverage to index.
         territorial_coverage = pkg_dict.get('territorial_coverage')
@@ -247,85 +247,6 @@ class EtalabQueryPlugin(plugins.SingletonPlugin):
                 for covered_territory in territorial_coverage.split(',')
                 if covered_territory
                 ))
-            territorial_weight = min(1.0, sum(
-                dict(
-                    ArrondissementOfCommuneOfFrance = 1.0 / 36700.0,
-                    ArrondissementOfFrance = 1.0 / 342.0,
-                    AssociatedCommuneOfFrance = 1.0 / 36700.0,
-                    CantonalFractionOfCommuneOfFrance = 1.0 / 36700.0,
-                    CantonCityOfFrance = 1.0 / 3785.0,
-                    CantonOfFrance = 1.0 / 4055.0,
-                    CatchmentAreaOfFrance = 1.0 / 1666.0,
-                    CommuneOfFrance = 1.0 / 36700.0,
-                    Country = 1.0,
-                    DepartmentOfFrance = 1.0 / 101.0,
-                    EmploymentAreaOfFrance = 1.0 / 322.0,
-                    IntercommunalityOfFrance = 1.0 / 2582.0,
-                    InternationalOrganization = 1.0,
-                    JusticeAreaOfFrance = 1.0 / 316.0,  # TODO: Justice areas have not the same size.
-                    MetropoleOfCountry = 22.0 / 27.0,
-                    Mountain = 8857.0 / (36700.0 * 7.0),
-                    OverseasCollectivityOfFrance = 1.0 / 109.0,
-                    OverseasOfCountry = 5.0 / 27.0,
-                    PaysOfFrance = 28849.0 / (36700.0 * 358.0),
-                    RegionalNatureParkOfFrance = 4126.0 / (36700.0 * 47.0),
-                    RegionOfFrance = 1.0 / 27.0,
-                    UrbanAreaOfFrance = 1.0 / 796.0,
-                    UrbanTransportsPerimeterOfFrance = 4077.0 / (36700.0 * 297.0),
-                    UrbanUnitOfFrance = 1.0 / 2390.0,
-                    ).get(covered_territory.split('/', 1)[0], 1.0 / 40000.0)
-                for covered_territory in territorial_coverage.split(',')
-                if covered_territory
-                ))
-        else:
-            # When no territorial coverage is given, consider that it is less than a commune, to boost datasets with a
-            # temporal coverage.
-            territorial_weight = 1.0 / 40000.0
-        # Convert number between 1 / 40000 and 1 to a number between 0.9 and 2
-        territorial_weight = normalize_weight(36700.0 * territorial_weight)
-
-        # Compute weight of territorial granularity.
-        territorial_coverage_granularity = pkg_dict.get('territorial_coverage_granularity')
-        if territorial_coverage_granularity:
-            territorial_coverage_granularity = {
-                'poi': 'CommuneOfFrance',
-                'iris': 'CommuneOfFrance',
-                'commune': 'CommuneOfFrance',
-                'canton': 'CantonOfFrance',
-                'epci': 'IntercommunalityOfFrance',
-                'department': 'DepartmentOfFrance',
-                'region': 'RegionOfFrance',
-                'france': 'Country',
-                }.get(territorial_coverage_granularity, territorial_coverage_granularity)
-            territorial_granularity_weight = dict(
-                ArrondissementOfCommuneOfFrance = 36700.0,
-                ArrondissementOfFrance = 342.0,
-                AssociatedCommuneOfFrance = 36700.0,
-                CantonalFractionOfCommuneOfFrance = 36700.0,
-                CantonCityOfFrance = 3785.0,
-                CantonOfFrance = 4055.0,
-                CatchmentAreaOfFrance = 1666.0,
-                CommuneOfFrance = 36700.0,
-                Country = 1.0,
-                DepartmentOfFrance = 101.0,
-                EmploymentAreaOfFrance = 322.0,
-                IntercommunalityOfFrance = 2582.0,
-                InternationalOrganization = 1.0,
-                JusticeAreaOfFrance = 316.0,  # TODO: Justice areas have not the same size.
-                MetropoleOfCountry = 27.0,
-                Mountain = (36700.0 * 7.0) / 8857.0,
-                OverseasCollectivityOfFrance = 109.0,
-                OverseasOfCountry = 27.0 / 5.0,
-                PaysOfFrance = (36700.0 * 358.0) / 28849.0,
-                RegionalNatureParkOfFrance = (36700.0 * 47.0) / 4126.0,
-                RegionOfFrance = 27.0,
-                UrbanAreaOfFrance = 796.0,
-                UrbanTransportsPerimeterOfFrance = (36700.0 * 297.0) / 4077.0,
-                UrbanUnitOfFrance = 2390.0,
-                ).get(territorial_coverage_granularity, 0.9)
-        else:
-            territorial_granularity_weight = 0.9
-        territorial_granularity_weight = normalize_weight(territorial_granularity_weight)
 
         # Add text of related.
         related_fragments = []
@@ -343,7 +264,7 @@ class EtalabQueryPlugin(plugins.SingletonPlugin):
                 related_weight += 1.0
         if related_fragments:
             pkg_dict['related'] = u'\n'.join(related_fragments)
-        related_weight = normalize_weight(related_weight)
+        related_weight = formulas.normalize_weight(related_weight)
 
         organization_id = pkg_dict.get('owner_org')
         if organization_id is not None:
@@ -355,8 +276,17 @@ class EtalabQueryPlugin(plugins.SingletonPlugin):
         certified_weight = 2.0 if certified_public_service is not None else 0.5
 
         # Add weight to index and ensure that 0 < weight <= 8.
-        pkg_dict['weight'] = (certified_weight * related_weight * temporal_weight * territorial_weight
-            * territorial_granularity_weight) / 4.0
+        pkg_dict['weight'] = (certified_weight * related_weight ** 2 * temporal_weight
+            * formulas.compute_territorial_weight(pkg_dict) * formulas.compute_territorial_granularity_weight(pkg_dict))
+        pkg_dict['weight_commune'] = (certified_weight * related_weight ** 2 * temporal_weight
+            * formulas.compute_territorial_weight(pkg_dict, 'ArrondissementOfCommuneOfFrance', 'CommuneOfFrance')
+            * formulas.compute_territorial_granularity_weight(pkg_dict))
+        pkg_dict['weight_department'] = (certified_weight * related_weight ** 2 * temporal_weight
+            * formulas.compute_territorial_weight(pkg_dict, 'DepartmentOfFrance', 'OverseasCollectivityOfFrance')
+            * formulas.compute_territorial_granularity_weight(pkg_dict))
+        pkg_dict['weight_region'] = (certified_weight * related_weight ** 2 * temporal_weight
+            * formulas.compute_territorial_weight(pkg_dict, 'RegionOfFrance')
+            * formulas.compute_territorial_granularity_weight(pkg_dict))
 
         return pkg_dict
 
@@ -412,7 +342,17 @@ class EtalabQueryPlugin(plugins.SingletonPlugin):
             # Add territory to c, to ensure that search.html can use it.
             tk.c.territory = territory_str
 
-        search_params['q'] = u'{} +_val_:"weight"^8'.format(search_params['q'])
+        search_params['q'] = u'{} +_val_:"{}"^2'.format(
+            search_params['q'],
+            dict(
+                ArrondissementOfCommuneOfFrance = 'weight_commune',
+                CommuneOfFrance = 'weight_commune',
+                Country = 'weight',
+                DepartmentOfFrance = 'weight_department',
+                OverseasCollectivityOfFrance = 'weight_department',
+                RegionOfFrance = 'weight_region',
+                ).get(territory['kind'], 'weight') if territory is not None else 'weight',
+            )
 
         if territory:
             # Store territory in a cookie after having removed "large" attributes.
@@ -496,12 +436,6 @@ def convert_to_extras(key, data, errors, context):
             last_index = max(last_index, key_tuple[1])
     data[('extras', last_index + 1, 'key')] = key[-1]
     data[('extras', last_index + 1, 'value')] = data[key]
-
-
-def normalize_weight(weight):
-    # Convert a weight between 0 and infinite to a number between 0 and 2.
-    # cf http://en.wikipedia.org/wiki/Inverse_trigonometric_functions
-    return math.atan(weight) * 4 / math.pi
 
 
 def reject_extras(container, *names):
