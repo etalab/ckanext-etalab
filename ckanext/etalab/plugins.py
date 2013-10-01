@@ -275,17 +275,18 @@ class EtalabQueryPlugin(plugins.SingletonPlugin):
             certified_public_service = None
         certified_weight = 2.0 if certified_public_service is not None else 0.5
 
-        # Add weight to index and ensure that 0 < weight <= 8.
+        # Add weight to index.
         pkg_dict['weight'] = (certified_weight * related_weight ** 2 * temporal_weight
-            * formulas.compute_territorial_weight(pkg_dict) * formulas.compute_territorial_granularity_weight(pkg_dict))
+            * formulas.compute_territorial_weight(pkg_dict) ** 2
+            * formulas.compute_territorial_granularity_weight(pkg_dict))
         pkg_dict['weight_commune'] = (certified_weight * related_weight ** 2 * temporal_weight
-            * formulas.compute_territorial_weight(pkg_dict, 'ArrondissementOfCommuneOfFrance', 'CommuneOfFrance')
+            * formulas.compute_territorial_weight(pkg_dict, 'ArrondissementOfCommuneOfFrance', 'CommuneOfFrance') ** 2
             * formulas.compute_territorial_granularity_weight(pkg_dict))
         pkg_dict['weight_department'] = (certified_weight * related_weight ** 2 * temporal_weight
-            * formulas.compute_territorial_weight(pkg_dict, 'DepartmentOfFrance', 'OverseasCollectivityOfFrance')
+            * formulas.compute_territorial_weight(pkg_dict, 'DepartmentOfFrance', 'OverseasCollectivityOfFrance') ** 2
             * formulas.compute_territorial_granularity_weight(pkg_dict))
         pkg_dict['weight_region'] = (certified_weight * related_weight ** 2 * temporal_weight
-            * formulas.compute_territorial_weight(pkg_dict, 'RegionOfFrance')
+            * formulas.compute_territorial_weight(pkg_dict, 'RegionOfFrance') ** 2
             * formulas.compute_territorial_granularity_weight(pkg_dict))
 
         return pkg_dict
