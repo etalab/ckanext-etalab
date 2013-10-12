@@ -43,7 +43,7 @@ from . import model as plugin_model
 
 conv = custom_conv(baseconv, states)
 N_ = lambda message: message
-year_or_month_or_day_re = re.compile(ur'[0-2]\d{3}(-(0[1-9]|1[0-2])(-([0-2][1-9]|3[0-1]))?)?$')
+year_or_month_or_day_re = re.compile(ur'[0-2]\d{3}(-(0[1-9]|1[0-2])(-([0-2]\d|3[0-1]))?)?$')
 
 
 class EtalabDatasetFormPlugin(plugins.SingletonPlugin, tk.DefaultDatasetForm):
