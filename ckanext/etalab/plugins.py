@@ -24,6 +24,7 @@
 
 
 import json
+import re
 import urllib
 import urllib2
 import urlparse
@@ -40,6 +41,7 @@ from . import model as plugin_model
 
 
 conv = custom_conv(baseconv, states)
+year_or_month_or_day_re = re.compile(ur'[0-2]\d{3}(-(0[1-9]|1[0-2])(-([0-2][1-9]|3[0-1]))?)?$')
 
 
 class EtalabDatasetFormPlugin(plugins.SingletonPlugin, tk.DefaultDatasetForm):
@@ -58,12 +60,12 @@ class EtalabDatasetFormPlugin(plugins.SingletonPlugin, tk.DefaultDatasetForm):
                 ],
             temporal_coverage_from = [
                 tk.get_validator('ignore_missing'),
-                converters.date_to_db,
+                date_to_db,
                 convert_to_extras,  # tk.get_converter('convert_to_extras') is buggy.
                 ],
             temporal_coverage_to = [
                 tk.get_validator('ignore_missing'),
-                converters.date_to_db,
+                date_to_db,
                 convert_to_extras,  # tk.get_converter('convert_to_extras') is buggy.
                 ],
             territorial_coverage = [
@@ -110,12 +112,12 @@ class EtalabDatasetFormPlugin(plugins.SingletonPlugin, tk.DefaultDatasetForm):
             temporal_coverage_from = [
                 tk.get_converter('convert_from_extras'),
                 tk.get_validator('ignore_missing'),
-                converters.date_to_form,
+                date_to_form,
                 ],
             temporal_coverage_to = [
                 tk.get_converter('convert_from_extras'),
                 tk.get_validator('ignore_missing'),
-                converters.date_to_form,
+                date_to_form,
                 ],
             territorial_coverage = [
                 tk.get_converter('convert_from_extras'),
@@ -437,6 +439,25 @@ def convert_to_extras(key, data, errors, context):
             last_index = max(last_index, key_tuple[1])
     data[('extras', last_index + 1, 'key')] = key[-1]
     data[('extras', last_index + 1, 'value')] = data[key]
+
+
+def date_to_db(value, context):
+    if context.get('api_version') is None:
+        return converters.date_to_db(value, context)
+    value, error = conv.pipe(
+        conv.test_isinstance(basestring),
+        conv.cleanup_line,
+        conv.test(year_or_month_or_day_re.match),
+        )(value, state = conv.default_state)
+    if error is not None:
+        raise df.Invalid(unicode(error).encode('utf-8'))
+    return value
+
+
+def date_to_form(value, context):
+    if context.get('api_version') is None:
+        return converters.date_to_form(value, context)
+    return value
 
 
 def reject_extras(container, *names):
