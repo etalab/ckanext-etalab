@@ -33,6 +33,7 @@ from biryani1 import baseconv, custom_conv, states, strings
 from ckan import plugins
 from ckan.lib import dictization
 from ckan.lib.navl import dictization_functions as df
+from ckan.logic import converters
 import ckan.plugins.toolkit as tk
 from sqlalchemy.sql import select
 
@@ -41,6 +42,7 @@ from . import model as plugin_model
 
 
 conv = custom_conv(baseconv, states)
+N_ = lambda message: message
 year_or_month_or_day_re = re.compile(ur'[0-2]\d{3}(-(0[1-9]|1[0-2])(-([0-2][1-9]|3[0-1]))?)?$')
 
 
@@ -50,8 +52,12 @@ class EtalabDatasetFormPlugin(plugins.SingletonPlugin, tk.DefaultDatasetForm):
     plugins.implements(plugins.ITemplateHelpers)
 
     def _modify_package_schema(self, schema):
-        from ckan.logic import converters
         schema.update(dict(
+            frequency = [
+                tk.get_validator('ignore_missing'),
+                validate_frequency,
+                convert_to_extras,  # tk.get_converter('convert_to_extras') is buggy.
+                ],
             supplier_id = [
                 tk.get_validator('ignore_missing'),
                 supplier_id_validator,
@@ -60,12 +66,12 @@ class EtalabDatasetFormPlugin(plugins.SingletonPlugin, tk.DefaultDatasetForm):
                 ],
             temporal_coverage_from = [
                 tk.get_validator('ignore_missing'),
-                date_to_db,
+                convert_date_to_db,
                 convert_to_extras,  # tk.get_converter('convert_to_extras') is buggy.
                 ],
             temporal_coverage_to = [
                 tk.get_validator('ignore_missing'),
-                date_to_db,
+                convert_date_to_db,
                 convert_to_extras,  # tk.get_converter('convert_to_extras') is buggy.
                 ],
             territorial_coverage = [
@@ -102,9 +108,12 @@ class EtalabDatasetFormPlugin(plugins.SingletonPlugin, tk.DefaultDatasetForm):
         return []
 
     def show_package_schema(self):
-        from ckan.logic import converters
         schema = super(EtalabDatasetFormPlugin, self).show_package_schema()
         schema.update(dict(
+            frequency = [
+                tk.get_converter('convert_from_extras'),
+                tk.get_validator('ignore_missing'),
+                ],
             supplier_id = [
                 tk.get_converter('convert_from_extras'),
                 tk.get_validator('ignore_missing'),
@@ -112,12 +121,12 @@ class EtalabDatasetFormPlugin(plugins.SingletonPlugin, tk.DefaultDatasetForm):
             temporal_coverage_from = [
                 tk.get_converter('convert_from_extras'),
                 tk.get_validator('ignore_missing'),
-                date_to_form,
+                convert_date_to_form,
                 ],
             temporal_coverage_to = [
                 tk.get_converter('convert_from_extras'),
                 tk.get_validator('ignore_missing'),
-                date_to_form,
+                convert_date_to_form,
                 ],
             territorial_coverage = [
                 tk.get_converter('convert_from_extras'),
@@ -429,19 +438,7 @@ class EtalabPlugin(plugins.SingletonPlugin):
         tk.add_resource('public', 'ckanext-etalab')
 
 
-def convert_to_extras(key, data, errors, context):
-    # Replace ckan.logic.converters.convert_to_extras to ensure that extras are appended after existing extras.
-    # Otherwise they will be erased by df.flatten.
-    assert isinstance(key, tuple) and len(key) == 1
-    last_index = -1
-    for key_tuple in data.iterkeys():
-        if len(key_tuple) >= 3 and key_tuple[0] == 'extras':
-            last_index = max(last_index, key_tuple[1])
-    data[('extras', last_index + 1, 'key')] = key[-1]
-    data[('extras', last_index + 1, 'value')] = data[key]
-
-
-def date_to_db(value, context):
+def convert_date_to_db(value, context):
     if context.get('api_version') is None:
         return converters.date_to_db(value, context)
     value, error = conv.pipe(
@@ -454,10 +451,22 @@ def date_to_db(value, context):
     return value
 
 
-def date_to_form(value, context):
+def convert_date_to_form(value, context):
     if context.get('api_version') is None:
         return converters.date_to_form(value, context)
     return value
+
+
+def convert_to_extras(key, data, errors, context):
+    # Replace ckan.logic.converters.convert_to_extras to ensure that extras are appended after existing extras.
+    # Otherwise they will be erased by df.flatten.
+    assert isinstance(key, tuple) and len(key) == 1
+    last_index = -1
+    for key_tuple in data.iterkeys():
+        if len(key_tuple) >= 3 and key_tuple[0] == 'extras':
+            last_index = max(last_index, key_tuple[1])
+    data[('extras', last_index + 1, 'key')] = key[-1]
+    data[('extras', last_index + 1, 'value')] = data[key]
 
 
 def reject_extras(container, *names):
@@ -483,3 +492,27 @@ def supplier_id_validator(key, data, errors, context):
     if not group:
         raise df.Invalid(tk._('Organization does not exist'))
     data[key] = group.id
+
+
+def validate_frequency(value, context):
+    value, error = conv.pipe(
+        conv.test_isinstance(basestring),
+        conv.cleanup_line,
+        conv.test_in([
+            u"annuelle",
+            u"au fil de l'eau",
+            u"bimensuelle",
+            u"bimestrielle",
+            u"hebdomadaire",
+            u"mensuelle",
+            u"quinquénale",
+            u"quotidienne",
+            u"semestrielle",
+            u"temps réel",
+            u"trimestrielle",
+            ], error = N_(u"Invalid frequency")),
+        )(value, state = conv.default_state)
+    if error is not None:
+        raise df.Invalid(unicode(error).encode('utf-8'))
+    return value
+

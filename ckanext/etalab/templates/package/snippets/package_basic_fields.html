@@ -47,4 +47,18 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
     {{ form.input('temporal_coverage_from', label='Début de la période couverte', id='field-temporal_coverage_from', placeholder='Entrez une date ou une année...', value=data.temporal_coverage_from, error=errors.temporal_coverage_from, classes=['control-full']) }}
     {{ form.input('temporal_coverage_to', label='Fin de la période couverte', id='field-temporal_coverage_to', placeholder='Entrez une date ou une année...', value=data.temporal_coverage_to, error=errors.temporal_coverage_to, classes=['control-full']) }}
+    {{ form.select('frequency', id = 'field-frequency', label = 'Fréquence de mise à jour', options = [
+            {'value': '', 'text': ''},
+            {'value': 'temps réel', 'text': 'Temps réel'},
+            {'value': 'quotidienne', 'text': 'Quotidienne'},
+            {'value': 'hebdomadaire', 'text': 'Hebdomadaire'},
+            {'value': 'bimensuelle', 'text': 'Bimensuelle'},
+            {'value': 'mensuelle', 'text': 'Mensuelle'},
+            {'value': 'bimestrielle', 'text': 'Bimestrielle'},
+            {'value': 'trimestrielle', 'text': 'Trimestrielle'},
+            {'value': 'semestrielle', 'text': 'Semestrielle'},
+            {'value': 'annuelle', 'text': 'Annuelle'},
+            {'value': 'bimensuelle', 'text': 'Bimensuelle'},
+            {'value': "quinquénale", 'text': "Quinquénale"},
+            ], selected = data.frequency) }}
 {% endblock %}

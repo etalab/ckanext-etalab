@@ -41,6 +41,13 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
         </tr>
     {% endif %}
 
+    {% if pkg_dict.frequency %}
+        <tr>
+            <th scope="row" class="dataset-label">Fréquence de mise à jour</th>
+            <td class="dataset-details">{{ pkg_dict.frequency }}</td>
+        </tr>
+    {% endif %}
+
     {{ super() }}
 {% endblock %}
 
