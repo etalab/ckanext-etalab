@@ -194,6 +194,7 @@ class EtalabQueryPlugin(plugins.SingletonPlugin):
             pkg_dict['supplier'] = organizations[0] if organizations else None
 
     def before_commit(self, session):
+        """Force reindexing of a dataset when one of its related changes."""
         # Code inspired from ckan.model.modification.DomainObjectModificationExtension.
         from ckan import model
 
