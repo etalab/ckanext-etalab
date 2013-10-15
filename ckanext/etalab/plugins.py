@@ -501,7 +501,8 @@ def validate_frequency(value, context):
         conv.cleanup_line,
         conv.test_in([
             u"annuelle",
-            u"au fil de l'eau",
+            u"aucune",
+            u"au fil de l'eau",  # realtime
             u"bimensuelle",
             u"bimestrielle",
             u"hebdomadaire",
@@ -509,7 +510,7 @@ def validate_frequency(value, context):
             u"quinquénale",
             u"quotidienne",
             u"semestrielle",
-            u"temps réel",
+            u"triennale",
             u"trimestrielle",
             ], error = N_(u"Invalid frequency")),
         )(value, state = conv.default_state)

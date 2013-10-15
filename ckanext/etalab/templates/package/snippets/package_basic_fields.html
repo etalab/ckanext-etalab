@@ -49,7 +49,8 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
     {{ form.input('temporal_coverage_to', label='Fin de la période couverte', id='field-temporal_coverage_to', placeholder='Entrez une date ou une année...', value=data.temporal_coverage_to, error=errors.temporal_coverage_to, classes=['control-full']) }}
     {{ form.select('frequency', id = 'field-frequency', label = 'Fréquence de mise à jour', options = [
             {'value': '', 'text': ''},
-            {'value': 'temps réel', 'text': 'Temps réel'},
+            {'value': 'aucune', 'text': 'Aucune'},
+            {'value': "au fil de l'eau", 'text': "Au fil de l'eau (temps réel)"},
             {'value': 'quotidienne', 'text': 'Quotidienne'},
             {'value': 'hebdomadaire', 'text': 'Hebdomadaire'},
             {'value': 'bimensuelle', 'text': 'Bimensuelle'},
@@ -58,7 +59,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
             {'value': 'trimestrielle', 'text': 'Trimestrielle'},
             {'value': 'semestrielle', 'text': 'Semestrielle'},
             {'value': 'annuelle', 'text': 'Annuelle'},
-            {'value': 'bimensuelle', 'text': 'Bimensuelle'},
+            {'value': "triennale", 'text': "Triennale"},
             {'value': "quinquénale", 'text': "Quinquénale"},
             ], selected = data.frequency) }}
 {% endblock %}
