@@ -50,7 +50,8 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
     {{ form.select('frequency', id = 'field-frequency', label = 'Fréquence de mise à jour', options = [
             {'value': '', 'text': ''},
             {'value': 'aucune', 'text': 'Aucune'},
-            {'value': "au fil de l'eau", 'text': "Au fil de l'eau (temps réel)"},
+            {'value': 'ponctuelle', 'text': 'Ponctuelle'},
+            {'value': 'temps réel', 'text': "Temps réel"},
             {'value': 'quotidienne', 'text': 'Quotidienne'},
             {'value': 'hebdomadaire', 'text': 'Hebdomadaire'},
             {'value': 'bimensuelle', 'text': 'Bimensuelle'},
@@ -60,6 +61,6 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
             {'value': 'semestrielle', 'text': 'Semestrielle'},
             {'value': 'annuelle', 'text': 'Annuelle'},
             {'value': "triennale", 'text': "Triennale"},
-            {'value': "quinquénale", 'text': "Quinquénale"},
+            {'value': "quinquennale", 'text': "Quinquénale"},
             ], selected = data.frequency) }}
 {% endblock %}
