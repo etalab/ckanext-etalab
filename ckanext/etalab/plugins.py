@@ -230,26 +230,30 @@ class EtalabQueryPlugin(plugins.SingletonPlugin):
         from ckan import model
 
         # Add temporal coverage to index.
-        temporal_coverage_from = pkg_dict.get('temporal_coverage_from')
-        year_from = temporal_coverage_from.split('-', 1)[0] if temporal_coverage_from is not None else None
-        temporal_coverage_to = pkg_dict.get('temporal_coverage_to')
-        year_to = temporal_coverage_to.split('-', 1)[0] if temporal_coverage_to is not None else None
-        if not year_from:
-            if year_to:
-                pkg_dict['covered_years'] = [year_to]
-        elif not year_to:
-            pkg_dict['covered_years'] = [year_from]
+        frequency = pkg_dict.get('frequency')
+        if frequency == u'temps réel':
+            temporal_weight = 2.0
         else:
-            year_from, year_to = sorted([year_from, year_to])
-            pkg_dict['covered_years'] = [
-                str(year)
-                for year in range(int(year_from), int(year_to) + 1)
-                ]
-        # Compute temporal weight.
-        # When no temporal coverage is given, consider that it is less than a year (0.9), to boost datasets with a
-        # temporal coverage.
-        temporal_weight = max(0.9, len(pkg_dict.get('covered_years', [])))
-        temporal_weight = formulas.normalize_weight(temporal_weight)
+            temporal_coverage_from = pkg_dict.get('temporal_coverage_from')
+            year_from = temporal_coverage_from.split('-', 1)[0] if temporal_coverage_from is not None else None
+            temporal_coverage_to = pkg_dict.get('temporal_coverage_to')
+            year_to = temporal_coverage_to.split('-', 1)[0] if temporal_coverage_to is not None else None
+            if not year_from:
+                if year_to:
+                    pkg_dict['covered_years'] = [year_to]
+            elif not year_to:
+                pkg_dict['covered_years'] = [year_from]
+            else:
+                year_from, year_to = sorted([year_from, year_to])
+                pkg_dict['covered_years'] = [
+                    str(year)
+                    for year in range(int(year_from), int(year_to) + 1)
+                    ]
+            # Compute temporal weight.
+            # When no temporal coverage is given, consider that it is less than a year (0.9), to boost datasets with a
+            # temporal coverage.
+            temporal_weight = max(0.9, len(pkg_dict.get('covered_years', [])))
+            temporal_weight = formulas.normalize_weight(temporal_weight)
 
         # Add territorial coverage to index.
         territorial_coverage = pkg_dict.get('territorial_coverage')
@@ -518,4 +522,3 @@ def validate_frequency(value, context):
     if error is not None:
         raise df.Invalid(unicode(error).encode('utf-8'))
     return value
-
