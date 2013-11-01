@@ -353,14 +353,14 @@ class EtalabQueryPlugin(plugins.SingletonPlugin):
                     for ancestor_kind_code in ancestors_kind_code
                     ]
 #                search_params['fq'] = '{} +covered_territories:{}'.format(search_params['fq'], territory_str)
-                search_params['fq'] = '{} +covered_territories:({})'.format(search_params['fq'],
+                search_params['fq'] = '{} +covered_territories:({})'.format(search_params.get('fq') or '',
                     ' OR '.join(territories))
 
             # Add territory to c, to ensure that search.html can use it.
             tk.c.territory = territory_str
 
         search_params['q'] = u'{} +_val_:"{}"^2'.format(
-            search_params['q'],
+            search_params.get('q') or '',
             dict(
                 ArrondissementOfCommuneOfFrance = 'weight_commune',
                 CommuneOfFrance = 'weight_commune',
