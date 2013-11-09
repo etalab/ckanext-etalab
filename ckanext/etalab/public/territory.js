@@ -6,7 +6,8 @@ ckan.module('autocomplete-territory', function (jQuery, _) {
                     data: function (term, page) {
                         return {
                             kind: ['ArrondissementOfCommuneOfFrance', 'CommuneOfFrance', 'Country',
-                                'DepartmentOfFrance', 'OverseasCollectivityOfFrance', 'RegionOfFrance'],
+                                'DepartmentOfFrance', 'InternationalOrganization', 'OverseasCollectivityOfFrance',
+                                'RegionOfFrance'],
                             page: page,
                             term: term || ''
                         };
@@ -57,7 +58,8 @@ ckan.module('autocomplete-territory', function (jQuery, _) {
                     data: function (term, page) {
                         return {
                             kind: ['ArrondissementOfCommuneOfFrance', 'CommuneOfFrance', 'Country',
-                                'DepartmentOfFrance', 'OverseasCollectivityOfFrance', 'RegionOfFrance'],
+                                'DepartmentOfFrance', 'InternationalOrganization', 'OverseasCollectivityOfFrance',
+                                'RegionOfFrance'],
                             page: page,
                             term: term || ''
                         };
