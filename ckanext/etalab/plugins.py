@@ -259,7 +259,7 @@ class EtalabQueryPlugin(plugins.SingletonPlugin):
         territorial_coverage = pkg_dict.get('territorial_coverage')
         if territorial_coverage:
             pkg_dict['covered_territories'] = sorted(set(
-                covered_territory
+                u'/'.join(covered_territory.split(u'/')[:2])
                 for covered_territory in territorial_coverage.split(',')
                 if covered_territory
                 ))
@@ -311,7 +311,7 @@ class EtalabQueryPlugin(plugins.SingletonPlugin):
         territory_str = search_params.get('extras', {}).get('ext_territory')
         if territory_str is not None:
             if '/' in territory_str:
-                territory_kind, territory_code = territory_str.strip().split('/')
+                territory_kind, territory_code = territory_str.strip().split('/')[:2]
             else:
                 try:
                     response = urllib2.urlopen(urlparse.urljoin(self.territoria_url,
@@ -428,6 +428,7 @@ class EtalabPlugin(plugins.SingletonPlugin):
         # see the ITemplateHelpers plugin interface.
         return dict(
             piwik = self.piwik,
+            render_territorial_coverage = self.render_territorial_coverage,
             )
 
     def piwik(self):
@@ -435,6 +436,14 @@ class EtalabPlugin(plugins.SingletonPlugin):
             piwik_site_id = self.piwik_site_id,
             piwik_network_location = urlparse.urlsplit(self.piwik_url)[1] if self.piwik_url is not None else None,
             ))
+
+    def render_territorial_coverage(self, territorial_coverage):
+        if territorial_coverage is None:
+            return None
+        return u', '.join(
+            territory_kind_code_name.strip().rsplit(u'/', 1)[-1]
+            for territory_kind_code_name in territorial_coverage.split(u',')
+            )
 
     def update_config(self, config):
         # Update CKAN's config settings, see the IConfigurer plugin interface.

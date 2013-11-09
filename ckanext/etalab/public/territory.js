@@ -16,7 +16,7 @@ ckan.module('autocomplete-territory', function (jQuery, _) {
                         var results = [];
                         $.each(data.data.items, function (index, item) {
                             results.push({
-                                id: item.kind + '/' + item.code,
+                                id: item.kind + '/' + item.code + '/' + item.main_postal_distribution,
                                 text: item.main_postal_distribution
                             });
                         });
@@ -37,26 +37,14 @@ ckan.module('autocomplete-territory', function (jQuery, _) {
                 initSelection: function (element, callback) {
                     var count = 0;
                     var selectionData = [];
-                    $(element.val().split(',')).each(function (index, kindCode) {
-                        var splitKindCode = kindCode.split('/');
-                        count += 1;
-                        $.ajax('http://ou.comarquage.fr/api/v1/territory?jsonp=?', {
-                            data: {
-                                kind: splitKindCode[0],
-                                code: splitKindCode[1]
-                            },
-                            dataType: 'json'
-                        }).done(function (data) {
-                            var item = data.data;
-                            selectionData.push({
-                                id: item.kind + '/' + item.code,
-                                text: item.main_postal_distribution
-                            });
-                            if (selectionData.length >= count) {
-                                callback(selectionData);
-                            }
+                    $(element.val().split(',')).each(function (index, kindCodeName) {
+                        var splitKindCodeName = kindCodeName.split('/');
+                        selectionData.push({
+                            id: kindCodeName,
+                            text: splitKindCodeName[2]
                         });
                     });
+                    callback(selectionData);
                 },
                 multiple: true,
                 placeholder: this.el.attr('placeholder') || 'Où...',
@@ -79,7 +67,7 @@ ckan.module('autocomplete-territory', function (jQuery, _) {
                         var results = [];
                         $.each(data.data.items, function (index, item) {
                             results.push({
-                                id: item.kind + '/' + item.code,
+                                id: item.kind + '/' + item.code + '/' + item.main_postal_distribution,
                                 text: item.main_postal_distribution
                             });
                         });
@@ -98,21 +86,12 @@ ckan.module('autocomplete-territory', function (jQuery, _) {
                 },
                 allowClear: true,
                 initSelection: function (element, callback) {
-                    var kindCode = $(element).val();
-                    if (kindCode !== '') {
-                        var splitKindCode = kindCode.split('/');
-                        $.ajax('http://ou.comarquage.fr/api/v1/territory?jsonp=?', {
-                            data: {
-                                kind: splitKindCode[0],
-                                code: splitKindCode[1]
-                            },
-                            dataType: 'json'
-                        }).done(function (data) {
-                            var item = data.data;
-                            callback({
-                                id: item.kind + '/' + item.code,
-                                text: item.main_postal_distribution
-                            });
+                    var kindCodeName = $(element).val();
+                    if (kindCodeName !== '') {
+                        var splitKindCodeName = kindCodeName.split('/');
+                        callback({
+                            id: kindCodeName,
+                            text: splitKindCodeName[2]
                         });
                     }
                 },

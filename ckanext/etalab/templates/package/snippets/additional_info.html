@@ -37,7 +37,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
     {% if pkg_dict.territorial_coverage %}
         <tr>
             <th scope="row" class="dataset-label">Territoires couverts</th>
-            <td class="dataset-details">{{ pkg_dict.territorial_coverage }}</td>
+            <td class="dataset-details">{{ h.render_territorial_coverage(pkg_dict.territorial_coverage) }}</td>
         </tr>
     {% endif %}
 
