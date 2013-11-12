@@ -266,7 +266,7 @@ class EtalabQueryPlugin(plugins.SingletonPlugin):
 
         # Add text of related.
         related_fragments = []
-        related_weight = 1.0
+        related_weight = 0.0
         for related_dataset in model.Session.query(model.RelatedDataset).filter(
                 model.RelatedDataset.dataset_id == pkg_dict['id'],
                 model.RelatedDataset.status == u'active',
@@ -280,7 +280,7 @@ class EtalabQueryPlugin(plugins.SingletonPlugin):
                 related_weight += 1.0
         if related_fragments:
             pkg_dict['related'] = u'\n'.join(related_fragments)
-        related_weight = formulas.normalize_weight(related_weight)
+        related_weight = formulas.normalize_bonus_weight(related_weight)
 
         organization_id = pkg_dict.get('owner_org')
         if organization_id is not None:

@@ -131,6 +131,12 @@ def compute_territorial_weight(pkg_dict, *local_kinds):
     return territorial_weight
 
 
+def normalize_bonus_weight(weight):
+    # Convert a weight between 0 and infinite to a number between 1 and 2.
+    # cf http://en.wikipedia.org/wiki/Inverse_trigonometric_functions
+    return math.atan(weight) * 2 / math.pi + 1.0
+
+
 def normalize_weight(weight):
     # Convert a weight between 0 and infinite to a number between 0.5 and 2.
     # cf http://en.wikipedia.org/wiki/Inverse_trigonometric_functions
