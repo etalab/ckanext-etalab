@@ -225,6 +225,11 @@ class EtalabQueryPlugin(plugins.SingletonPlugin):
                         for package in instance.datasets:
                             for observer in self.domain_object_modification_observers:
                                 observer.notify(package, operation)
+                elif isinstance(instance, model.UserFollowingDataset):
+                    operation = model.DomainObjectOperation.changed
+                    package = model.Session.query(model.Package).get(instance.object_id)
+                    for observer in self.domain_object_modification_observers:
+                        observer.notify(package, operation)
 
     def before_index(self, pkg_dict):
         from ckan import model
@@ -291,17 +296,22 @@ class EtalabQueryPlugin(plugins.SingletonPlugin):
             certified_public_service = None
         certified_weight = 2.0 if certified_public_service is not None else 0.5
 
+        follower_count = model.Session.query(model.UserFollowingDataset).filter(
+            model.UserFollowingDataset.object_id == pkg_dict['id'],
+            ).count()
+        followers_weight = formulas.normalize_bonus_weight(follower_count)
+
         # Add weight to index.
-        pkg_dict['weight'] = (certified_weight * related_weight ** 2 * temporal_weight
+        pkg_dict['weight'] = (certified_weight * followers_weight *related_weight ** 2 * temporal_weight
             * formulas.compute_territorial_weight(pkg_dict) ** 2
             * formulas.compute_territorial_granularity_weight(pkg_dict))
-        pkg_dict['weight_commune'] = (certified_weight * related_weight ** 2 * temporal_weight
+        pkg_dict['weight_commune'] = (certified_weight * followers_weight * related_weight ** 2 * temporal_weight
             * formulas.compute_territorial_weight(pkg_dict, 'ArrondissementOfCommuneOfFrance', 'CommuneOfFrance') ** 2
             * formulas.compute_territorial_granularity_weight(pkg_dict))
-        pkg_dict['weight_department'] = (certified_weight * related_weight ** 2 * temporal_weight
+        pkg_dict['weight_department'] = (certified_weight * followers_weight * related_weight ** 2 * temporal_weight
             * formulas.compute_territorial_weight(pkg_dict, 'DepartmentOfFrance', 'OverseasCollectivityOfFrance') ** 2
             * formulas.compute_territorial_granularity_weight(pkg_dict))
-        pkg_dict['weight_region'] = (certified_weight * related_weight ** 2 * temporal_weight
+        pkg_dict['weight_region'] = (certified_weight * followers_weight * related_weight ** 2 * temporal_weight
             * formulas.compute_territorial_weight(pkg_dict, 'RegionOfFrance') ** 2
             * formulas.compute_territorial_granularity_weight(pkg_dict))
 
