@@ -369,8 +369,9 @@ class EtalabQueryPlugin(plugins.SingletonPlugin):
             # Add territory to c, to ensure that search.html can use it.
             tk.c.territory = territory_str
 
-        search_params['q'] = u'{} +_val_:"{}"^2'.format(
-            search_params.get('q') or '',
+        # Use extended DisMax query parser to ensure that text in related or notes is less important than title.
+        search_params['defType'] = u'edismax'
+        search_params['qf'] = u'name title groups^0.5 notes^0.5 tags^0.5 text^0.25 +_val_:"{}"^2'.format(
             dict(
                 ArrondissementOfCommuneOfFrance = 'weight_commune',
                 CommuneOfFrance = 'weight_commune',
@@ -393,6 +394,7 @@ class EtalabQueryPlugin(plugins.SingletonPlugin):
         else:
             tk.response.delete_cookie('territory')
             tk.response.delete_cookie('territory-infos')
+
         return search_params
 
     def configure(self, config):
