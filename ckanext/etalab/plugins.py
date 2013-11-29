@@ -371,7 +371,7 @@ class EtalabQueryPlugin(plugins.SingletonPlugin):
 
         # Use extended DisMax query parser to ensure that text in related or notes is less important than title.
         search_params['defType'] = u'edismax'
-        search_params['qf'] = u'name title groups^0.5 notes^0.5 tags^0.5 text^0.25 +_val_:"{}"^2'.format(
+        search_params['bf'] = u'{}^2'.format(
             dict(
                 ArrondissementOfCommuneOfFrance = 'weight_commune',
                 CommuneOfFrance = 'weight_commune',
@@ -381,6 +381,7 @@ class EtalabQueryPlugin(plugins.SingletonPlugin):
                 RegionOfFrance = 'weight_region',
                 ).get(territory['kind'], 'weight') if territory is not None else 'weight',
             )
+        search_params['qf'] = u'name title groups^0.5 notes^0.5 tags^0.5 text^0.25'
 
         if territory:
             # Store territory in a cookie after having removed "large" attributes.
