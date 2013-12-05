@@ -303,7 +303,7 @@ class EtalabQueryPlugin(plugins.SingletonPlugin):
         followers_weight = formulas.normalize_bonus_weight(follower_count)
 
         # Add weight to index.
-        pkg_dict['weight'] = (certified_weight * followers_weight *related_weight ** 2 * temporal_weight
+        pkg_dict['weight'] = (certified_weight * followers_weight * related_weight ** 2 * temporal_weight
             * formulas.compute_territorial_weight(pkg_dict) ** 2
             * formulas.compute_territorial_granularity_weight(pkg_dict))
         pkg_dict['weight_commune'] = (certified_weight * followers_weight * related_weight ** 2 * temporal_weight
