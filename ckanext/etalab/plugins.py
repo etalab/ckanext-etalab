@@ -294,6 +294,7 @@ class EtalabQueryPlugin(plugins.SingletonPlugin):
                 ).first()
         else:
             certified_public_service = None
+        pkg_dict['certified_public_service'] = bool(certified_public_service)
         certified_weight = 2.0 if certified_public_service is not None else 0.5
 
         follower_count = model.Session.query(model.UserFollowingDataset).filter(
