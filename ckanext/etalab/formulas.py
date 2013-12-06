@@ -38,6 +38,7 @@ def compute_territorial_granularity_weight(pkg_dict):
             'department': 'DepartmentOfFrance',
             'region': 'RegionOfFrance',
             'pays': 'Country',
+            'other': 'RegionOfFrance',
             }.get(territorial_coverage_granularity, territorial_coverage_granularity)
         territorial_granularity_weight = dict(
             ArrondissementOfCommuneOfFrance = 36700.0,

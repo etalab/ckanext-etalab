@@ -43,6 +43,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
             {'value': 'department', 'text': 'Département'},
             {'value': 'region', 'text': 'Région'},
             {'value': 'pays', 'text': 'Pays'},
+            {'value': 'other', 'text': "Autre"},
             ], selected = data.territorial_coverage_granularity) }}
 
     {{ form.input('temporal_coverage_from', label='Début de la période couverte', id='field-temporal_coverage_from', placeholder='Entrez une date ou une année...', value=data.temporal_coverage_from, error=errors.temporal_coverage_from, classes=['control-full']) }}
