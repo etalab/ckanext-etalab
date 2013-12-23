@@ -240,9 +240,19 @@ class EtalabQueryPlugin(plugins.SingletonPlugin):
             temporal_weight = 2.0
         else:
             temporal_coverage_from = pkg_dict.get('temporal_coverage_from')
-            year_from = temporal_coverage_from.split('-', 1)[0] if temporal_coverage_from is not None else None
+            year_from = None
+            if temporal_coverage_from is not None:
+                match = year_or_month_or_day_re.match(temporal_coverage_from)
+                if match is not None:
+                    year_from = temporal_coverage_from.split('-', 1)[0]
+
             temporal_coverage_to = pkg_dict.get('temporal_coverage_to')
-            year_to = temporal_coverage_to.split('-', 1)[0] if temporal_coverage_to is not None else None
+            year_to = None
+            if temporal_coverage_to is not None:
+                match = year_or_month_or_day_re.match(temporal_coverage_to)
+                if match is not None:
+                    year_to = temporal_coverage_to.split('-', 1)[0]
+
             if not year_from:
                 if year_to:
                     pkg_dict['covered_years'] = [year_to]
@@ -254,6 +264,7 @@ class EtalabQueryPlugin(plugins.SingletonPlugin):
                     str(year)
                     for year in range(int(year_from), int(year_to) + 1)
                     ]
+
             # Compute temporal weight.
             # When no temporal coverage is given, consider that it is less than a year (0.9), to boost datasets with a
             # temporal coverage.
