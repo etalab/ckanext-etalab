@@ -68,6 +68,7 @@ setup(
         etalab = ckanext.etalab.plugins:EtalabPlugin
         etalab_dataset_form = ckanext.etalab.plugins:EtalabDatasetFormPlugin
         etalab_query = ckanext.etalab.plugins:EtalabQueryPlugin
+        piwik = ckanext.etalab.piwik:PiwikPlugin
         """,
     include_package_data = True,
     install_requires = [

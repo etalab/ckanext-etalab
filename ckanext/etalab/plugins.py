@@ -428,39 +428,15 @@ class EtalabQueryPlugin(plugins.SingletonPlugin):
 
 
 class EtalabPlugin(plugins.SingletonPlugin):
-    piwik_site_id = None
-    piwik_url = None
-
-    plugins.implements(plugins.IConfigurable)
     plugins.implements(plugins.IConfigurer)
     plugins.implements(plugins.ITemplateHelpers)
-
-    def configure(self, config):
-        etalab_config = conv.check(conv.struct(
-            {
-                'piwik.site_id': conv.input_to_int,
-                'piwik.url': conv.make_input_to_url(full = True, error_if_fragment = True, error_if_path = True,
-                    error_if_query = True),
-                },
-            default = 'drop',
-            ))(config, state = conv.default_state)
-        config.update(etalab_config)
-        self.piwik_site_id = config['piwik.site_id']
-        self.piwik_url = config['piwik.url']
 
     def get_helpers(self):
         # Tell CKAN what custom template helper functions this plugin provides,
         # see the ITemplateHelpers plugin interface.
         return dict(
-            piwik = self.piwik,
             render_territorial_coverage = self.render_territorial_coverage,
             )
-
-    def piwik(self):
-        return tk.render_snippet('snippets/piwik.html', dict(
-            piwik_site_id = self.piwik_site_id,
-            piwik_network_location = urlparse.urlsplit(self.piwik_url)[1] if self.piwik_url is not None else None,
-            ))
 
     def render_territorial_coverage(self, territorial_coverage):
         if territorial_coverage is None:
